@@ -200,8 +200,8 @@ szovegek = {
         "vilag_nincs_mit_menteni": "There is no world to back up yet.",
         "dolgozom": "Working...",
         "kivalasztas": "Select",
-        "online_jatekosok": "Online players",
-        "nincs_jatekos": "No players online.",
+        "online_jatekosok": "Players",
+        "nincs_jatekos": "No players have joined yet.",
         "nem_fut_szerver": "The server is not running.",
         "ban": "Ban",
         "ipban": "IP ban",
@@ -558,6 +558,18 @@ def metabetoltes(mappa):
             if int(tunnel.get("port") or 0) == 19132:
                 tunnel["port"] = 19133
     adat.setdefault("pinggyertesites", True)
+    adat.setdefault("jatekosok", [])
+    if not isinstance(adat["jatekosok"], list):
+        adat["jatekosok"] = []
+    adat["jatekosok"] = [str(nev).strip() for nev in adat["jatekosok"] if str(nev).strip()]
+    try:
+        gyorsitotar = json.loads((Path(mappa) / "usercache.json").read_text(encoding="utf-8"))
+        for elem in gyorsitotar:
+            nev = str(elem.get("name", "")).strip()
+            if nev and nev not in adat["jatekosok"]:
+                adat["jatekosok"].append(nev)
+    except Exception:
+        pass
     adat.setdefault("backup", {})
     backup = adat["backup"]
     backup.setdefault("engedelyezve", True)
@@ -1013,7 +1025,7 @@ def pinggyterminal(tunnel, mappa, cim):
         program, argumentumok = pinggyparancs(tunnel)
         segito = pinggysegitoprogram(program, argumentumok)
         lista = ", ".join(powershellszoveg(x) for x in segito[1:])
-        sorok = ["Write-Host 'CubicLantern Pinggy tunnel'", "Write-Host 'No password or interactive confirmation is required.'", "$process = Start-Process -FilePath %s -ArgumentList @(%s) -NoNewWindow -PassThru" % (powershellszoveg(segito[0]), lista), "Write-Host 'The tunnel is running in this window.'", "while ($true) {", "if ($process.HasExited) { $process = Start-Process -FilePath %s -ArgumentList @(%s) -NoNewWindow -PassThru }" % (powershellszoveg(segito[0]), lista), "Start-Sleep -Seconds 1", "}"]
+        sorok = ["Write-Host 'CubicLantern Pinggy tunnel'", "Write-Host 'No password or interactive confirmation is required.'", "$program = %s" % powershellszoveg(segito[0]), "Write-Host 'The tunnel is running in this window.'", "while ($true) {", "Start-Process -FilePath $program -ArgumentList @(%s) -NoNewWindow -Wait" % lista, "Start-Sleep -Seconds 2", "}"]
         launcher.write_text("\r\n".join(sorok) + "\r\n", encoding="utf-8")
         return subprocess.Popen(["cmd.exe", "/d", "/c", "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(launcher)], cwd=str(mappa), creationflags=subprocess.CREATE_NEW_CONSOLE)
     launcher = mappa / (".cubiclantern_pinggy_%s.sh" % uuid.uuid4().hex)
@@ -1593,6 +1605,9 @@ class szerverfolyamat(QObject):
             nev = (talalat.group(1) or talalat.group(2) or "").strip()
             if nev and nev not in self.jatekosok:
                 self.jatekosok.append(nev)
+                if nev not in self.meta["jatekosok"]:
+                    self.meta["jatekosok"].append(nev)
+                    self.metamentese()
                 self.jatekosvaltozas.emit()
             return
         talalat = kilepesminta.search(sor)
@@ -2982,21 +2997,23 @@ class jatekosoldal(QWidget):
 
     def jatekoslistafrissites(self):
         self.jatekoslista.clear()
-        if not self.szerver.fut():
-            elem = QListWidgetItem(t("nem_fut_szerver"))
-            elem.setFlags(Qt.ItemFlag.NoItemFlags)
-            self.jatekoslista.addItem(elem)
-            return
-        if not self.szerver.jatekosok:
+        nevek = list(self.szerver.meta.get("jatekosok", []))
+        for nev in self.szerver.jatekosok:
+            if nev not in nevek:
+                nevek.append(nev)
+        if not nevek:
             elem = QListWidgetItem(t("nincs_jatekos"))
             elem.setFlags(Qt.ItemFlag.NoItemFlags)
             self.jatekoslista.addItem(elem)
             return
-        for nev in list(self.szerver.jatekosok):
+        for nev in nevek:
             sor = QWidget()
             elrendezes = QHBoxLayout(sor)
             elrendezes.setContentsMargins(8, 4, 8, 4)
+            online = nev in self.szerver.jatekosok
+            allapot = t("fut") if online else t("all")
             elrendezes.addWidget(QLabel(nev), 1)
+            elrendezes.addWidget(QLabel(("● " if online else "○ ") + allapot))
             gombok = [("ban", "piros", lambda _=False, n=nev: self.szerver.parancs("ban " + n)),
                       ("ipban", "piros", lambda _=False, n=nev: self.szerver.parancs("ban-ip " + n)),
                       ("op", "", lambda _=False, n=nev: self.szerver.parancs("op " + n)),
@@ -3671,6 +3688,19 @@ def pinggysegitofolyamat():
     if not parancs:
         return 1
     if os.name == "nt":
+        if sys.stdout is None or sys.stderr is None:
+            try:
+                import ctypes
+                ctypes.windll.kernel32.AttachConsole(-1)
+            except (AttributeError, OSError):
+                pass
+            try:
+                if sys.stdout is None:
+                    sys.stdout = open("CONOUT$", "w", encoding="utf-8", errors="replace")
+                if sys.stderr is None:
+                    sys.stderr = open("CONOUT$", "w", encoding="utf-8", errors="replace")
+            except OSError:
+                pass
         try:
             from winpty import PtyProcess
         except ImportError:

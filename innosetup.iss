@@ -3,7 +3,7 @@
 ; Non-commercial use only
 
 #define MyAppName "CubicLantern"
-#define MyAppVersion "0.4.2"
+#define MyAppVersion "0.4.3"
 #define MyAppPublisher "Zoárd Gódor"
 #define MyAppURL "https://zoardgodor.github.io/CubicLantern/"
 #define MyAppExeName "CubicLantern.exe"
@@ -11,7 +11,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{DA99D8B6-019D-4CC7-9A3E-22361B6D475D}
+AppId={{C40845E6-B65C-41A9-B37D-ECC13B5AF844}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -35,7 +35,7 @@ LicenseFile=C:\Users\zoard\Documents\GitHub\zmcservermanager\LICENSE.txt
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=C:\Users\zoard\Documents\GitHub\zmcservermanager
-OutputBaseFilename=CubicLantern_v0.4.2_WIN64
+OutputBaseFilename=CubicLantern_v0.4.3_WIN64_installer
 SetupIconFile=C:\Users\zoard\Documents\GitHub\zmcservermanager\icon-CL.ico
 SolidCompression=yes
 WizardStyle=modern dynamic
@@ -48,7 +48,7 @@ Name: "hungarian"; MessagesFile: "compiler:Languages\Hungarian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\zoard\Documents\GitHub\zmcservermanager\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\zoard\Documents\GitHub\zmcservermanager\dist\CubicLantern\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\zoard\Documents\GitHub\zmcservermanager\dist\CubicLantern\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
