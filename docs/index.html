@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="CubicLantern helps you host Minecraft servers on your own PC without port forwarding.">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-CL-icon-pack/icon-CL-32x32.png">
+<link rel="apple-touch-icon" href="icon-CL-icon-pack/icon-CL-128x128.png">
+<title>CubicLantern | Minecraft server hosting from home</title>
+<style>
+:root{color-scheme:dark;--bg:#09111f;--panel:#111e32;--panel2:#172943;--text:#eef5ff;--muted:#aebdd0;--accent:#8ee3c4;--accent2:#62c4ab;--line:#263a56}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0,#173251 0,transparent 35%),var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:inherit}.wrap{width:min(1100px,calc(100% - 36px));margin:auto}.topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 0}.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:.02em}.brand img{width:42px;height:42px;border-radius:12px;box-shadow:0 8px 20px #0005}.lang{border:1px solid var(--line);background:#102039;color:var(--text);border-radius:999px;padding:9px 15px;cursor:pointer;font-weight:700}.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:50px;align-items:center;padding:72px 0 84px}.eyebrow{color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.14em;font-size:.78rem}.hero h1{font-size:clamp(2.4rem,6vw,5.2rem);line-height:1.02;margin:14px 0 22px;letter-spacing:-.055em}.hero h1 span{color:var(--accent)}.lead{color:var(--muted);font-size:1.2rem;max-width:650px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}.button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:12px;padding:13px 18px;background:var(--accent);color:#07131a;font-weight:800;transition:transform .2s,background .2s}.button:hover{transform:translateY(-2px);background:#b0f2da}.button.secondary{background:var(--panel2);border:1px solid var(--line);color:var(--text)}.hero-card{background:linear-gradient(145deg,#183354,#102039);border:1px solid var(--line);border-radius:28px;padding:34px;box-shadow:0 24px 80px #0005}.hero-card img{width:112px;height:112px;border-radius:28px;box-shadow:0 16px 30px #0006}.hero-card h2{margin:22px 0 8px;font-size:1.7rem}.hero-card p{color:var(--muted);margin:0}.section-title{font-size:2rem;margin:0 0 10px}.section-lead{color:var(--muted);margin:0 0 28px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:18px;padding:24px}.card-icon{font-size:1.6rem;color:var(--accent)}.card h3{margin:12px 0 7px}.card p{color:var(--muted);margin:0}.feature-section{padding:20px 0 82px}.highlight{background:linear-gradient(120deg,#122941,#102039);border:1px solid var(--line);border-radius:24px;padding:34px;margin-top:20px}.highlight h2{margin:0 0 10px}.highlight p{color:var(--muted);max-width:800px;margin:0}.footer{border-top:1px solid var(--line);padding:28px 0 40px;color:var(--muted);font-size:.9rem}.footer strong{color:var(--text)}
+ .support-section{padding:0 0 34px}.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.type-card{position:relative;overflow:hidden;background:linear-gradient(145deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:18px;padding:22px}.type-card::after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;background:var(--accent);opacity:.08;right:-22px;top:-22px}.type-card h3{margin:0 0 5px}.type-card p{color:var(--muted);margin:0}.type-badge{display:inline-block;color:#07131a;background:var(--accent);border-radius:999px;padding:3px 9px;font-size:.73rem;font-weight:800;margin-bottom:12px}.notice{border:1px solid #40506a;background:#0e1a2c;border-radius:18px;padding:22px;margin-top:18px;color:var(--muted)}.notice strong{color:var(--text)}.notice a{color:var(--accent)}
+@media(max-width:760px){.hero{grid-template-columns:1fr;padding:48px 0 62px;gap:34px}.cards,.type-grid{grid-template-columns:1fr}.hero-card{padding:25px}.hero h1{font-size:3.4rem}.topbar{padding-top:16px}}
+</style>
+</head>
+<body>
+<header class="wrap topbar">
+  <div class="brand"><img src="icon-CL-icon-pack/icon-CL-48x48.png" alt="CubicLantern icon"><span>CubicLantern</span></div>
+  <button class="lang" id="language" type="button">Magyar</button>
+</header>
+<main>
+  <section class="wrap hero">
+    <div>
+      <div class="eyebrow" data-key="eyebrow">Minecraft server hosting from home</div>
+      <h1 data-key="title">Your server.<br><span>Your PC.</span></h1>
+      <p class="lead" data-key="lead">Host a Minecraft server on your own computer without port forwarding. CubicLantern makes setup, server management and tunnel connections easier.</p>
+      <div class="actions"><a class="button" href="https://github.com/zoardgodor/zmcservermanager" data-key="github">GitHub / README</a><a class="button secondary" href="https://github.com/zoardgodor/zmcservermanager/releases" data-key="releases">Releases / download</a></div>
+    </div>
+    <aside class="hero-card"><img src="icon-CL-icon-pack/icon-CL-128x128.png" alt="CubicLantern logo"><h2 data-key="cardTitle">A simple home server toolkit</h2><p data-key="cardText">Run Java, Bedrock or PumpkinMC and share it with friends through Playit or Pinggy.</p></aside>
+  </section>
+  <section class="wrap feature-section">
+    <h2 class="section-title" data-key="whyTitle">Why CubicLantern?</h2>
+    <p class="section-lead" data-key="whyLead">Everything you need to turn an everyday PC into a friendly Minecraft server.</p>
+    <div class="cards">
+      <article class="card"><div class="card-icon">⌂</div><h3 data-key="hostTitle">Host on your own PC</h3><p data-key="hostText">No rented hosting required. Keep your worlds and files at home, and connect players through a tunnel without opening router ports.</p></article>
+      <article class="card"><div class="card-icon">⚙</div><h3 data-key="potatoTitle">Have an old potato PC? No problem.</h3><p data-key="potatoText">PumpkinMC is a lightweight Minecraft server implementation, and it is available in CubicLantern alongside Java.</p></article>
+      <article class="card"><div class="card-icon">↗</div><h3 data-key="tunnelTitle">Choose your connection</h3><p data-key="tunnelText">Use Playit for a stable address, or Pinggy for a quick, simple connection. Java, Bedrock and HTTP tunnels can be configured to fit your server.</p></article>
+    </div>
+    <section class="support-section">
+      <h2 class="section-title" data-key="supportedTitle">Supported Minecraft server types</h2>
+      <p class="section-lead" data-key="supportedLead">Pick the server software that matches your world and your hardware.</p>
+      <div class="type-grid">
+        <article class="type-card"><span class="type-badge">JAVA</span><h3>Vanilla</h3><p data-key="vanillaText">The original Minecraft Java server experience.</p></article>
+        <article class="type-card"><span class="type-badge">JAVA</span><h3>Paper · Purpur</h3><p data-key="paperText">Optimized Java servers for plugins and performance.</p></article>
+        <article class="type-card"><span class="type-badge">JAVA</span><h3>Fabric · Forge · NeoForge</h3><p data-key="modText">Mod-ready Java server options.</p></article>
+        <article class="type-card"><span class="type-badge">BEDROCK</span><h3>Bedrock Edition</h3><p data-key="bedrockText">Run a Bedrock server with its default UDP setup.</p></article>
+        <article class="type-card"><span class="type-badge">LIGHTWEIGHT</span><h3>PumpkinMC</h3><p data-key="pumpkinText">A lightweight server implementation available beside Java.</p></article>
+      </div>
+    </section>
+    <div class="notice"><strong data-key="legalTitle">Independent project</strong><br><span data-key="legalText">CubicLantern can launch Playit and Pinggy, but it is not affiliated with, endorsed by, or an official partner of either service. They are third-party services; this page is not advertising or sponsorship.</span></div>
+    <div class="highlight"><h2 data-key="readyTitle">Ready to play with friends?</h2><p data-key="readyText">CubicLantern keeps the technical setup in one place, so you can focus on the world you are building. Download the app or read the guide on GitHub to get started.</p></div>
+  </section>
+</main>
+<footer class="wrap footer"><strong>CubicLantern</strong> <span data-key="footer">— Minecraft server management for your own PC.</span></footer>
+<script>
+const translations={
+  en:{eyebrow:'Minecraft server hosting from home',title:'Your server.<br><span>Your PC.</span>',lead:'Host a Minecraft server on your own computer without port forwarding. CubicLantern makes setup, server management and tunnel connections easier.',github:'GitHub / README',releases:'Releases / download',cardTitle:'A simple home server toolkit',cardText:'Run Java, Bedrock or PumpkinMC and share it with friends through Playit or Pinggy.',whyTitle:'Why CubicLantern?',whyLead:'Everything you need to turn an everyday PC into a friendly Minecraft server.',hostTitle:'Host on your own PC',hostText:'No rented hosting required. Keep your worlds and files at home, and connect players through a tunnel without opening router ports.',potatoTitle:'Have an old potato PC? No problem.',potatoText:'PumpkinMC is also available in CubicLantern alongside Java, so you can choose the server type that fits your setup.',tunnelTitle:'Choose your connection',tunnelText:'Use Playit for a stable address, or Pinggy for a quick, simple connection. Java, Bedrock and HTTP tunnels can be configured to fit your server.',readyTitle:'Ready to play with friends?',readyText:'CubicLantern keeps the technical setup in one place, so you can focus on the world you are building. Download the app or read the guide on GitHub to get started.',footer:'— Minecraft server management for your own PC.'},
+  hu:{eyebrow:'Minecraft szerver a saját gépeden',title:'A szervered.<br><span>A gépeden.</span>',lead:'Futtass Minecraft szervert a saját számítógépeden porttovábbítás nélkül. A CubicLantern egyszerűbbé teszi a beállítást, a szerverkezelést és a tunnelkapcsolatokat.',github:'GitHub / README',releases:'Releases / letöltés',cardTitle:'Egyszerű otthoni szervereszköz',cardText:'Futtass Java, Bedrock vagy PumpkinMC szervert, és oszd meg a barátaiddal Playiten vagy Pinggyn keresztül.',whyTitle:'Miért CubicLantern?',whyLead:'Minden, amire szükséged van ahhoz, hogy egy átlagos gépből baráti Minecraft szerver legyen.',hostTitle:'Szerver a saját gépeden',hostText:'Nem kell bérelt tárhely. A világok és fájlok otthon maradnak, a játékosok pedig routerportok megnyitása nélkül csatlakozhatnak egy tunnel segítségével.',potatoTitle:'Régi, gyenge géped van? Nem gond.',potatoText:'A PumpkinMC a Java mellett szintén elérhető a CubicLanternben, így kiválaszthatod a gépedhez illő szervertípust.',tunnelTitle:'Válaszd ki a kapcsolatot',tunnelText:'A Playit stabil címet ad, a Pinggy pedig gyors és egyszerű kapcsolatot. Java-, Bedrock- és HTTP-tunnelek is beállíthatók a szerveredhez.',readyTitle:'Készen állsz a közös játékra?',readyText:'A CubicLantern egy helyre rendezi a technikai beállításokat, így a készülő világodra figyelhetsz. Töltsd le az alkalmazást, vagy olvasd el a GitHub útmutatóját.',footer:'— Minecraft szerverkezelés a saját gépedhez.'}
+};
+Object.assign(translations.en,{potatoText:'PumpkinMC is a lightweight Minecraft server implementation, and it is available in CubicLantern alongside Java.',supportedTitle:'Supported Minecraft server types',supportedLead:'Pick the server software that matches your world and your hardware.',vanillaText:'The original Minecraft Java server experience.',paperText:'Optimized Java servers for plugins and performance.',modText:'Mod-ready Java server options.',bedrockText:'Run a Bedrock server with its default UDP setup.',pumpkinText:'A lightweight server implementation available beside Java.',legalTitle:'Independent project',legalText:'CubicLantern can launch Playit and Pinggy, but it is not affiliated with, endorsed by, or an official partner of either service. They are third-party services; this page is not advertising or sponsorship.'});
+Object.assign(translations.hu,{potatoText:'A PumpkinMC egy könnyű Minecraft-szervermegvalósítás, amely a Java mellett a CubicLanternben is elérhető.',supportedTitle:'Támogatott Minecraft szervertípusok',supportedLead:'Válaszd ki a világodhoz és a gépedhez illő szerverprogramot.',vanillaText:'Az eredeti Minecraft Java szerverélmény.',paperText:'Teljesítményre és pluginokra optimalizált Java-szerverek.',modText:'Modokhoz előkészített Java-szerverek.',bedrockText:'Bedrock szerver az alapértelmezett UDP-beállítással.',pumpkinText:'Könnyű szervermegvalósítás, amely a Java mellett választható.',legalTitle:'Független projekt',legalText:'A CubicLantern képes elindítani a Playitet és a Pinggyt, de nem hivatalos partnerük, nem kapcsolódik hozzájuk, és egyik szolgáltató sem támogatja. Ezek külső szolgáltatások; ez az oldal nem reklám és nem szponzorált tartalom.'});
+let lang='en';
+const languageButton=document.getElementById('language');
+languageButton.onclick=()=>{lang=lang==='en'?'hu':'en';document.documentElement.lang=lang;for(const element of document.querySelectorAll('[data-key]'))element.innerHTML=translations[lang][element.dataset.key];languageButton.textContent=lang==='en'?'Magyar':'English';};
+</script>
+</body>
+</html>

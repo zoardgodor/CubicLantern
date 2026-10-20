@@ -1,0 +1,83 @@
+CubicLantern - build an executable from main.py with PyInstaller
+
+Build separately on each target operating system. A Windows executable must be built on Windows, and a Linux executable must be built on Linux.
+
+WINDOWS
+========
+
+Open PowerShell in the project folder.
+
+Create and activate a virtual environment:
+
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+If PowerShell blocks activation, run PowerShell as the current user and then try again:
+
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+
+Install the dependencies:
+
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+
+Build the windowed executable:
+
+python -m PyInstaller --noconfirm --clean --onedir --windowed --icon=icon-CL.ico --name CubicLantern main.py
+
+The executable will be created here:
+
+dist\CubicLantern.exe
+
+For a console version useful for debugging, use this instead:
+
+python -m PyInstaller --noconfirm --clean --onedir --console --icon=icon-CL.ico --name CubicLantern-Debug main.py
+
+The Windows build can be tested with:
+
+dist\CubicLantern.exe
+
+
+LINUX
+=====
+
+Open a terminal in the project folder.
+
+Create and activate a virtual environment:
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+Install the Linux dependencies. pywinpty is only needed on Windows, so it is intentionally omitted here:
+
+python -m pip install --upgrade pip
+python -m pip install PySide6 psutil pyinstaller
+
+Build the windowed executable:
+
+python -m PyInstaller --noconfirm --clean --onedir --windowed --icon=icon-CL.ico --name CubicLantern main.py
+
+The executable will be created here:
+
+dist/CubicLantern
+
+Make sure it is executable and test it:
+
+chmod +x dist/CubicLantern
+./dist/CubicLantern
+
+For a console version useful for debugging, use this instead:
+
+python -m PyInstaller --noconfirm --clean --onedir --console --icon=icon-CL.ico --name CubicLantern-Debug main.py
+
+
+NOTES
+=====
+
+Do not copy a Windows executable to Linux or a Linux executable to Windows. Build on the operating system where the executable will run.
+
+The generated executable is placed in the dist folder. The build folder and the .spec file can be removed after a successful build if they are not needed.
+
+Pinggy is not bundled with CubicLantern. Download the official Windows or Linux Pinggy client from https://pinggy.io/cli/ and import it in the application. On Linux, the imported binary must be named pinggy and have execute permission; the application sets this permission during import.
+
+Playit is downloaded by the application from the official playit-cloud/playit-agent release source when it is first started.
