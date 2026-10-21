@@ -1,0 +1,40 @@
+CubicLantern Linux - build an executable from main_linux.py with PyInstaller
+
+Open a terminal in the Linux folder.
+
+Create and activate a virtual environment:
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+Install the dependencies:
+
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+
+Build the windowed executable:
+
+python -m PyInstaller --noconfirm --clean --onedir --windowed --icon=../icon-CL-icon-pack/icon-CL.ico --name CubicLantern --distpath ../dist/CubicLantern_linux --workpath build --specpath build main_linux.py
+
+The executable will be created here:
+
+../dist/CubicLantern_linux/CubicLantern
+
+For a console version useful for debugging, use this instead:
+
+python -m PyInstaller --noconfirm --clean --onedir --console --icon=../icon-CL-icon-pack/icon-CL.ico --name CubicLantern-Debug --distpath ../dist/CubicLantern_linux --workpath build --specpath build main_linux.py
+
+The debug executable will be created here:
+
+../dist/CubicLantern_linux/CubicLantern-Debug
+
+NOTES
+=====
+
+Build on Linux for Linux. Do not copy a Windows executable to Linux.
+
+The normal and debug builds are kept in separate folders below dist/CubicLantern_linux, so they do not overwrite the Windows build output.
+
+Pinggy is not bundled with CubicLantern. Download the official Linux client from https://pinggy.io/cli/ and import it in the application. The imported binary must be named pinggy and have execute permission; the application sets this permission during import.
+
+Playit is downloaded by the application from the official playit-cloud/playit-agent release source when it is first started.
