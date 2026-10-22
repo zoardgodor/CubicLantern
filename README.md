@@ -19,29 +19,30 @@ CubicLantern Server Manager is a PySide6 application for creating, configuring a
 - Simple Voice Chat guidance explains where to put the public UDP address and port. Playit is convenient for SVC because its address stays stable.
 - English (default) and Hungarian interface.
 
-## Run from source
+## Run from source on Windows
 
-Python 3.9 or newer is required.
+Python 3.9 or newer is required. Create and activate a virtual environment in PowerShell:
 
-```bash
-python -m venv venv
-```
-
-Activate it (`venv\Scripts\activate` on Windows or `source venv/bin/activate` on Linux/macOS), then run:
-
-```bash
-pip install -r requirements.txt
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 python main.py
 ```
 
-## Build a binary with PyInstaller
+## Build a Windows binary
 
-```bash
-pip install -r requirements.txt
-pyinstaller --noconfirm --clean --onefile --windowed --name CubicLantern main.py
+The repository includes a Windows builder that works from a fresh Git clone. It creates a `.venv` virtual environment, upgrades pip, installs `requirements.txt`, then asks whether to build an executable. Choose a normal windowed build or a debug build with a console; choosing anything other than `y`/`yes` ends after setup.
+
+On Windows, run `windows_build.bat` by double-clicking it, from Command Prompt, or from the VS Code integrated terminal:
+
+```bat
+windows_build.bat
 ```
 
-The result is placed in `dist/`. Build on the target operating system. Releases contain a ready Windows installer made with Inno Setup Compiler, a portable Windows ZIP binary, and a Linux `tar.gz` binary built and tested on Linux Mint. If the Linux build does not work on another distribution, build it locally with PyInstaller.
+Python 3.9 or newer must already be installed and available as `py` or `python`. Built applications are placed in `dist/CubicLantern` or `dist/CubicLantern-Debug`.
+
+Releases contain a ready Windows installer made with Inno Setup Compiler and a portable Windows ZIP binary.
 
 ## Tunnel selection
 
@@ -60,8 +61,36 @@ The Playit agent is downloaded from the official `playit-cloud/playit-agent` rel
 | OS | Path |
 |---|---|
 | Windows | `%APPDATA%\MinecraftServerMaker` |
-| Linux | `~/.local/share/MinecraftServerMaker` |
-| macOS | `~/Library/Application Support/MinecraftServerMaker` |
+
+# CubicLantern Server Manager for Linux
+
+This folder contains the Linux source, Linux dependencies, and Linux build tools for CubicLantern Server Manager.
+
+## Run from source
+
+Python 3.9 or newer is required. From this `Linux` folder, run:
+
+```bash
+./linux_build.sh
+```
+
+The script creates `Linux/.venv`, upgrades pip, and installs `Linux/requirements.txt`. Answer `n` when prompted if you only want to prepare the source environment.
+
+## Build a Linux binary
+
+Run `./linux_build.sh` from a terminal, including the VS Code integrated terminal. It is executable after a Git clone. The script asks whether to build, then offers a normal windowed build and a debug build with a console.
+
+The normal build is placed in `../dist/CubicLantern_linux/CubicLantern`. The debug build is placed in `../dist/CubicLantern_linux/CubicLantern-Debug`. These separate folders never replace the Windows output in `../dist/CubicLantern`.
+
+The builder was created and tested on Linux Mint. If the supplied Linux release does not work on another distribution, build a local binary with this script. If Python, pip, or virtual-environment support is missing, the script detects a supported distribution package manager, explains why administrator permission is needed, and then requests `sudo` only to install the missing system packages. On another distribution, install those packages with its package manager and run the script again.
+
+## Manual build
+
+See [make_executable_from_py.txt](make_executable_from_py.txt) for the equivalent PyInstaller commands.
+
+## Data location
+
+`~/.local/share/MinecraftServerMaker`, unless `XDG_DATA_HOME` is set.
 
 ## Releases
 

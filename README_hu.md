@@ -19,29 +19,30 @@ A CubicLantern Server Manager egy PySide6-alapú alkalmazás Minecraft Java-, Be
 - A Simple Voice Chat beállításához útmutató mutatja, hová kell beírni a nyilvános UDP-címet és portot. SVC-hez kényelmes a Playit, mert a címe stabil.
 - Angol (alapértelmezett) és magyar felület.
 
-## Futtatás forrásból
+## Futtatás forrásból Windowson
 
-Python 3.9 vagy újabb szükséges.
+Python 3.9 vagy újabb szükséges. PowerShellben hozd létre és aktiváld a virtuális környezetet:
 
-```bash
-python -m venv venv
-```
-
-Aktiváld a környezetet (`venv\Scripts\activate` Windowson vagy `source venv/bin/activate` Linuxon/macOS-en), majd:
-
-```bash
-pip install -r requirements.txt
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 python main.py
 ```
 
-## Bináris készítése PyInstallerrel
+## Windowsos bináris készítése
 
-```bash
-pip install -r requirements.txt
-pyinstaller --noconfirm --clean --onefile --windowed --name CubicLantern main.py
+A projekt Windowsos buildert tartalmaz, amely friss Git-klónból is használható. Létrehozza a `.venv` virtuális környezetet, frissíti a pipet, telepíti a `requirements.txt` függőségeit, majd megkérdezi, hogy készüljön-e bináris. Választhatsz normál, ablakos vagy konzolos hibakereső változatot; a `y` vagy `yes` választól eltérő válasz után csak a telepítés készül el, a script kilép.
+
+Windowson a `windows_build.bat` dupla kattintással, Parancssorból vagy a VS Code integrált termináljából indítható:
+
+```bat
+windows_build.bat
 ```
 
-Az eredmény a `dist/` mappába kerül. A fordítást azon az operációs rendszeren végezd, ahol használni fogod. A Releases oldalon letölthető egy Inno Setup Compilerrel készített Windows-telepítő, egy telepítés nélküli Windows-bináris ZIP-ben, valamint egy Linux Minten elkészített és tesztelt `tar.gz` bináris. Ha a Linux-változat más disztribúción nem működik, ott helyben készíts binárist PyInstallerrel.
+Ehhez előzetesen telepített, `py` vagy `python` parancsként elérhető Python 3.9 vagy újabb szükséges. Az elkészült alkalmazás a `dist/CubicLantern` vagy a `dist/CubicLantern-Debug` mappába kerül.
+
+A Releases oldalon letölthető egy Inno Setup Compilerrel készített Windows-telepítő és egy telepítés nélküli Windows-bináris ZIP-ben.
 
 ## Tunnel kiválasztása
 
@@ -60,8 +61,37 @@ A Playit agentet a hivatalos `playit-cloud/playit-agent` kiadási tárhelyről t
 | Rendszer | Útvonal |
 |---|---|
 | Windows | `%APPDATA%\MinecraftServerMaker` |
-| Linux | `~/.local/share/MinecraftServerMaker` |
-| macOS | `~/Library/Application Support/MinecraftServerMaker` |
+
+
+# CubicLantern Server Manager Linuxra
+
+Ez a mappa tartalmazza a CubicLantern Server Manager Linuxos forrását, Linuxos függőségeit és buildelőeszközeit.
+
+## Futtatás forrásból
+
+Python 3.9 vagy újabb szükséges. Ebből a `Linux` mappából futtasd:
+
+```bash
+./linux_build.sh
+```
+
+A script létrehozza a `Linux/.venv` virtuális környezetet, frissíti a pipet, és telepíti a `Linux/requirements.txt` függőségeit. Ha csak a forráskörnyezetet szeretnéd előkészíteni, a kérdésnél válaszolj `n`-nel.
+
+## Linuxos bináris készítése
+
+A `./linux_build.sh` terminálból, akár a VS Code integrált termináljából is futtatható. Git-klónozás után futtatható jogosultsággal rendelkezik. A script megkérdezi, készüljön-e build, majd normál ablakos és konzolos hibakereső változatot ajánl fel.
+
+A normál build a `../dist/CubicLantern_linux/CubicLantern`, a debug build a `../dist/CubicLantern_linux/CubicLantern-Debug` mappába kerül. Ezek külön mappák, ezért nem írják felül a `../dist/CubicLantern` Windowsos kimenetét.
+
+A builder Linux Minten készült és azon lett tesztelve. Ha a mellékelt Linux-kiadás más disztribúción nem működik, készíts helyi binárist ezzel a scripttel. Ha hiányzik a Python, a pip vagy a virtuális környezet támogatása, a script megkeresi a támogatott disztribúciós csomagkezelőt, elmagyarázza, miért kell rendszergazdai jogosultság, majd csak a hiányzó rendszercsomagok telepítéséhez kér `sudo` jelszót. Más disztribúción a hiányzó csomagokat a saját csomagkezelővel telepítsd, majd futtasd újra a scriptet.
+
+## Kézi build
+
+Az ennek megfelelő PyInstaller-parancsokat a [make_executable_from_py.txt](make_executable_from_py.txt) fájl tartalmazza.
+
+## Adatok helye
+
+`~/.local/share/MinecraftServerMaker`, kivéve ha az `XDG_DATA_HOME` más értékre van állítva.
 
 ## Letöltések
 
