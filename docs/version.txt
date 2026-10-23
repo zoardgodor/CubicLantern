@@ -1,2 +1,2 @@
-windows=v1.1.0
+windows=v1.2.0
 linux=v1.2.1L
