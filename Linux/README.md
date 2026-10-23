@@ -20,6 +20,8 @@ Run `./linux_build.sh` from a terminal, including the VS Code integrated termina
 
 The normal build is placed in `../dist/CubicLantern_linux/CubicLantern`. The debug build is placed in `../dist/CubicLantern_linux/CubicLantern-Debug`. These separate folders never replace the Windows output in `../dist/CubicLantern`.
 
+The Linux app checks for new CubicLantern releases on startup and can check for Paper, Purpur and PumpkinMC server updates when a server is opened.
+
 The builder was created and tested on Linux Mint. If the supplied Linux release does not work on another distribution, build a local binary with this script. If Python, pip, or virtual-environment support is missing, the script detects a supported distribution package manager, explains why administrator permission is needed, and then requests `sudo` only to install the missing system packages. On another distribution, install those packages with its package manager and run the script again.
 
 ## Manual build
@@ -28,4 +30,4 @@ See [make_executable_from_py.txt](make_executable_from_py.txt) for the equivalen
 
 ## Data location
 
-`~/.local/share/MinecraftServerMaker`, unless `XDG_DATA_HOME` is set.
+`~/.local/share/CubicLantern`, unless `XDG_DATA_HOME` is set. The earlier `MinecraftServerMaker` folder is migrated automatically.

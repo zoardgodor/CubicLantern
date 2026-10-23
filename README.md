@@ -8,6 +8,8 @@ CubicLantern Server Manager is a PySide6 application for creating, configuring a
 
 - Vanilla, Paper, Purpur, Fabric, Forge, NeoForge, Bedrock and PumpkinMC server creation.
 - Automatic Java, server and Bedrock downloads.
+- Automatic Paper, Purpur and PumpkinMC update checks when opening a server, with an optional update download.
+- The app checks for a newer release at startup; release versions are maintained in `docs/version.txt` and in the platform source files.
 - Server properties editor, world manager, player management, mods and plugins.
 - PumpkinMC is marked as recommended for low-end computers.
 - Playit and Pinggy tunnels can run separately or at the same time.
@@ -60,7 +62,20 @@ The Playit agent is downloaded from the official `playit-cloud/playit-agent` rel
 
 | OS | Path |
 |---|---|
-| Windows | `%APPDATA%\MinecraftServerMaker` |
+| Windows | `%APPDATA%\CubicLantern` |
+
+The earlier `MinecraftServerMaker` folder is migrated automatically.
+
+## Release versions
+
+Keep `docs/version.txt` in this format and update the matching `APP_VERSION` value at the top of `main.py` or `Linux/main_linux.py` for each release:
+
+```text
+windows=v1.1.0
+linux=v1.2.1L
+```
+
+The app reads this file from the published GitHub Pages site. A network or site outage does not prevent the app from starting.
 
 # CubicLantern Server Manager for Linux
 
@@ -90,7 +105,7 @@ See [make_executable_from_py.txt](make_executable_from_py.txt) for the equivalen
 
 ## Data location
 
-`~/.local/share/MinecraftServerMaker`, unless `XDG_DATA_HOME` is set.
+`~/.local/share/CubicLantern`, unless `XDG_DATA_HOME` is set. The earlier `MinecraftServerMaker` folder is migrated automatically.
 
 ## Releases
 
