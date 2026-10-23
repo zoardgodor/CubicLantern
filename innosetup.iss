@@ -3,7 +3,7 @@
 ; Non-commercial use only
 
 #define MyAppName "CubicLantern"
-#define MyAppVersion "0.4.3"
+#define MyAppVersion "v1.1.0"
 #define MyAppPublisher "Zoárd Gódor"
 #define MyAppURL "https://zoardgodor.github.io/CubicLantern/"
 #define MyAppExeName "CubicLantern.exe"
@@ -11,7 +11,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{C40845E6-B65C-41A9-B37D-ECC13B5AF844}
+AppId={{F8E66231-B793-4C02-AA6B-733491F7E346}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -35,7 +35,7 @@ LicenseFile=C:\Users\zoard\Documents\GitHub\zmcservermanager\LICENSE.txt
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=C:\Users\zoard\Documents\GitHub\zmcservermanager
-OutputBaseFilename=CubicLantern_v0.4.3_WIN64_installer
+OutputBaseFilename=CubicLantern_v1.1.0_WIN64_installer
 SetupIconFile=C:\Users\zoard\Documents\GitHub\zmcservermanager\icon-CL.ico
 SolidCompression=yes
 WizardStyle=modern dynamic
