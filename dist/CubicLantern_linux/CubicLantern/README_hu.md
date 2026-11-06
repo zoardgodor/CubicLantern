@@ -8,6 +8,8 @@ A CubicLantern Server Manager egy PySide6-alapú alkalmazás Minecraft Java-, Be
 
 - Vanilla, Paper, Purpur, Fabric, Forge, NeoForge, Bedrock és PumpkinMC szerver létrehozása.
 - Java-, szerver- és Bedrock-fájlok automatikus letöltése.
+- Automatikus Paper-, Purpur- és PumpkinMC-frissítéskeresés a szerver megnyitásakor, opcionális letöltéssel.
+- Az alkalmazás induláskor ellenőrzi az új kiadást; a verziók a `docs/version.txt` fájlban és a platformforrásokban vannak megadva.
 - `server.properties` szerkesztő, világkezelő, játékoskezelő, mod- és pluginkezelés.
 - A PumpkinMC a gyenge gépekre javasolt szervertípusként jelenik meg.
 - Playit és Pinggy tunnel külön vagy egyszerre is futtatható.
@@ -60,7 +62,20 @@ A Playit agentet a hivatalos `playit-cloud/playit-agent` kiadási tárhelyről t
 
 | Rendszer | Útvonal |
 |---|---|
-| Windows | `%APPDATA%\MinecraftServerMaker` |
+| Windows | `%APPDATA%\CubicLantern` |
+
+A korábbi `MinecraftServerMaker` mappát a program automatikusan áthelyezi.
+
+## Kiadási verziók
+
+A `docs/version.txt` fájl formátuma maradjon ilyen, és minden kiadáskor módosítsd a megfelelő `APP_VERSION` értéket a `main.py` vagy a `Linux/main_linux.py` elején:
+
+```text
+windows=v1.1.0
+linux=v1.2.1L
+```
+
+Az alkalmazás ezt a fájlt a GitHub Pages webhelyről olvassa be. Hálózati vagy webhelyhiba nem akadályozza az alkalmazás elindítását.
 
 
 # CubicLantern Server Manager Linuxra
@@ -91,7 +106,7 @@ Az ennek megfelelő PyInstaller-parancsokat a [make_executable_from_py.txt](make
 
 ## Adatok helye
 
-`~/.local/share/MinecraftServerMaker`, kivéve ha az `XDG_DATA_HOME` más értékre van állítva.
+`~/.local/share/CubicLantern`, kivéve ha az `XDG_DATA_HOME` más értékre van állítva. A korábbi `MinecraftServerMaker` mappát a program automatikusan áthelyezi.
 
 ## Letöltések
 

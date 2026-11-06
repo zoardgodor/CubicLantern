@@ -1,19 +1,22 @@
+APP_VERSION = "v1.1.0"
+APP_VERSION_URL = "https://zoardgodor.github.io/CubicLantern/version.txt"
+APP_WEBSITE_URL = "https://zoardgodor.github.io/CubicLantern/"
+
 import sys
 import os
 import re
 import json
+import base64
 import time
 import shutil
 import socket
 import struct
 import zipfile
-import tarfile
 import hashlib
 import uuid
 import platform
 import secrets
 import subprocess
-import shlex
 import threading
 import urllib.request
 import urllib.error
@@ -21,7 +24,7 @@ import urllib.parse
 from datetime import datetime
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QThread, Signal, QProcess, QProcessEnvironment, QTimer, QUrl, QObject, QSize
+from PySide6.QtCore import Qt, QThread, Signal, QProcess, QTimer, QUrl, QObject, QSize
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
@@ -37,13 +40,8 @@ except ImportError:
 
 
 def adatmappakeresese():
-    if os.name == "nt":
-        alap = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
-    elif sys.platform == "darwin":
-        alap = str(Path.home() / "Library" / "Application Support")
-    else:
-        alap = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
-    return Path(alap) / "MinecraftServerMaker"
+    alap = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
+    return Path(alap) / "CubicLantern"
 
 
 adatmappa = adatmappakeresese()
@@ -70,6 +68,12 @@ tipusnevek = {
 szovegek = {
     "en": {
         "cim": "CubicLantern Server Manager",
+        "app_update_title": "CubicLantern update",
+        "app_update_prompt": "CubicLantern {verzio} is available. Update now?",
+        "app_update_now": "Update now",
+        "app_update_later": "Later",
+        "app_update_button": "Update",
+        "app_update_website": "Website: {url}",
         "szerver_letrehozasa": "Create server",
         "nincs_szerver": "You don't have any servers yet. Create one first!",
         "fut": "Running",
@@ -86,6 +90,7 @@ szovegek = {
         "start": "Start",
         "stop": "Stop",
         "restart": "Restart",
+        "konzol_megnyitasa": "Open console",
         "konzol_bevitel": "Type a command...",
         "kuldes": "Send",
         "memoria": "Memory usage",
@@ -132,6 +137,15 @@ szovegek = {
         "keszul": "Creating server...",
         "java_letoltes": "Downloading Java {verzio}...",
         "jar_letoltes": "Downloading server files...",
+        "jar_update_search": "Check for server JAR updates",
+        "jar_update_checking": "Checking for server updates...",
+        "jar_update_available": "A server update is available: {verzio}. Update it now?",
+        "jar_update_none": "The server is up to date.",
+        "jar_update_offline": "Could not check for server updates. Check your internet connection.",
+        "jar_update_downloading": "Downloading server update {verzio}...",
+        "jar_update_done": "Server updated to {verzio}.",
+        "jar_update_running": "Stop the server before installing an update.",
+        "jar_update_error": "The server update failed: {hiba}",
         "telepites": "Running installer...",
         "konfig_iras": "Writing configuration...",
         "kesz_szerver": "Server created!",
@@ -245,15 +259,18 @@ szovegek = {
         "pinggy_leallit": "Stop Pinggy",
         "pinggy_fut": "Running in a separate terminal window",
         "pinggy_all": "Stopped",
-        "pinggy_tipp": "Pinggy has three free tunnels at the same time. The tunnels start without a password or interactive confirmation. HTTP is also started without a password.",
+        "pinggy_tipp": " ",
         "pinggy_tipus": "Tunnel {db} type",
         "pinggy_port": "Local port",
+        "pinggy_csatlakozas": "Minecraft on this PC: localhost:{port}\nMinecraft from another device on your LAN: {lan}:{port}",
+        "pinggy_lan_nincs": "LAN address unavailable",
+        "pinggy_tcp_tipp": "Pinggy TCP: enter the address shown after tcp:// in the Pinggy window into Minecraft (omit tcp://).",
         "pinggy_jelszo": "HTTP password (optional)",
         "pinggy_info": "Pinggy's free service is often faster and simpler, needs no account, and is useful for short sessions with friends. Its disadvantage is that it creates a new address every 60 minutes. Playit may have higher latency on its free plan, but its address is stable and stays the same. A Playit subscription is the best choice for a long-running server. You can run Playit and Pinggy together, for example Playit for Simple Voice Chat and Pinggy for Minecraft.",
-        "svc_info": "Simple Voice Chat: create a separate UDP tunnel for the voice-chat port, then enter its public address and port in the mod/plugin config (voice_host and port, or the equivalent fields). If the public address changes, update the config and restart the server. Playit is convenient for SVC because its address is stable.",
+        "svc_info": " ",
         "pinggy_parancs": "Command preview",
         "pinggy_parancsok": "Command preview",
-        "pinggy_window": "Each selected tunnel opens in its own separate terminal window without asking for a password or interactive confirmation.",
+        "pinggy_window": "Each selected tunnel opens in its own separate terminal window.",
         "backup_menu": "Backups",
         "backup_title": "Automatic backups",
         "backup_enabled": "Enable automatic backups",
@@ -276,12 +293,15 @@ szovegek = {
         "pinggy_ujraindult": "Pinggy restarted.",
         "pinggy_ujra": "Restart Pinggy now",
         "pinggy_allapot": "Status",
-        "pinggy_hianyzik": "Pinggy UDP needs pinggy.exe. Put it next to the app or add it to PATH.",
+        "pinggy_hianyzik": "Pinggy CLI is required for UDP tunnels. SSH cannot create UDP tunnels. Download the Pinggy CLI from pinggy.io/cli and import it here.",
+        "pinggy_ssh_hianyzik": "OpenSSH Client is not installed. On Windows 10/11, open Settings > System > Optional features > Add/View features, find OpenSSH Client, and install it. Or run PowerShell as Administrator and execute:\nAdd-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0\nRestart CubicLantern after installation.",
+        "pinggy_cli_hiba": "Pinggy CLI exited. Falling back to OpenSSH.",
+        "pinggy_udp_fallback": "Pinggy CLI exited, but SSH cannot create UDP tunnels. Install or repair the Pinggy CLI.",
         "pinggy_binaris": "Pinggy binary",
         "pinggy_letoltes": "Download Pinggy from pinggy.io/cli",
         "pinggy_import": "Import binary",
         "pinggy_torles": "Delete imported binary",
-        "pinggy_nincs": "No imported binary. UDP requires pinggy.exe.",
+        "pinggy_nincs": "Pinggy CLI not found. UDP tunnels require the Pinggy CLI.",
         "pinggy_import_ok": "Pinggy binary imported as {fajl}.",
         "pinggy_torles_ok": "Imported Pinggy binary deleted.",
         "pinggy_lejar_10": "Pinggy expires in 10 minutes. It will restart automatically.",
@@ -290,6 +310,12 @@ szovegek = {
     },
     "hu": {
         "cim": "CubicLantern Server Manager",
+        "app_update_title": "CubicLantern-frissítés",
+        "app_update_prompt": "Elérhető a CubicLantern {verzio} verziója. Frissíted most?",
+        "app_update_now": "Frissítés most",
+        "app_update_later": "Később",
+        "app_update_button": "Frissítés",
+        "app_update_website": "Weboldal: {url}",
         "szerver_letrehozasa": "Szerver létrehozása",
         "nincs_szerver": "Még nincs szervered. Előbb hozz létre egyet!",
         "fut": "Fut",
@@ -306,6 +332,7 @@ szovegek = {
         "start": "Indítás",
         "stop": "Leállítás",
         "restart": "Újraindítás",
+        "konzol_megnyitasa": "Konzol megnyitása",
         "konzol_bevitel": "Írj be egy parancsot...",
         "kuldes": "Küldés",
         "memoria": "Memóriahasználat",
@@ -352,6 +379,15 @@ szovegek = {
         "keszul": "Szerver létrehozása...",
         "java_letoltes": "Java {verzio} letöltése...",
         "jar_letoltes": "Szerverfájlok letöltése...",
+        "jar_update_search": "Szerver-JAR-frissítések keresése",
+        "jar_update_checking": "Szerverfrissítések keresése...",
+        "jar_update_available": "Új szerververzió érhető el: {verzio}. Frissíted most?",
+        "jar_update_none": "A szerver naprakész.",
+        "jar_update_offline": "A frissítések nem ellenőrizhetők. Ellenőrizd az internetkapcsolatot.",
+        "jar_update_downloading": "A(z) {verzio} szerverfrissítés letöltése...",
+        "jar_update_done": "A szerver frissült erre: {verzio}.",
+        "jar_update_running": "Frissítés telepítése előtt állítsd le a szervert.",
+        "jar_update_error": "A szerver frissítése sikertelen: {hiba}",
         "telepites": "Telepítő futtatása...",
         "konfig_iras": "Beállítások írása...",
         "kesz_szerver": "A szerver elkészült!",
@@ -465,14 +501,17 @@ szovegek = {
         "pinggy_leallit": "Pinggy leállítása",
         "pinggy_fut": "Külön terminálablakban fut",
         "pinggy_all": "Leállítva",
-        "pinggy_tipp": "A Pinggy ingyenesen egyszerre három tunnelt tud futtatni. A tunnelek jelszó és interaktív megerősítés nélkül indulnak. A HTTP is jelszó nélkül indul.",
+        "pinggy_tipp": " ",
         "pinggy_tipus": "{db}. tunnel típusa",
         "pinggy_port": "Helyi port",
+        "pinggy_csatlakozas": "Minecraft ezen a gépen: localhost:{port}\nMinecraft egy másik eszközről a helyi hálózaton: {lan}:{port}",
+        "pinggy_lan_nincs": "A LAN-cím nem érhető el",
+        "pinggy_tcp_tipp": "Pinggy TCP: a Pinggy ablakban a tcp:// utáni címet írd be a Minecraftba, a tcp:// előtag nélkül.",
         "pinggy_jelszo": "HTTP-jelszó (opcionális)",
         "pinggy_info": "A Pinggy ingyenes változata gyorsabb és egyszerűbben beállítható lehet, nem kell hozzá fiók, és rövid, barátokkal játszott alkalmakhoz praktikus. Hátránya, hogy 60 percenként új címet generál. A Playit ingyenes verzióján több ping fordulhat elő, viszont a cím stabil és megmarad. Hosszú ideig futó szerverhez Playit-előfizetés javasolt. A Playit és a Pinggy egyszerre is futhat, például Playit a Simple Voice Chathez, Pinggy pedig a Minecrafthoz.",
-        "svc_info": "Simple Voice Chat: hozz létre külön UDP tunnelt a voice-chat portjához, majd írd be a nyilvános címet és portot a mod/plugin konfigurációjába (voice_host és port, vagy az ezeknek megfelelő mezők). Ha a nyilvános cím megváltozik, írd át a konfigurációt és indítsd újra a szervert. Az SVC-hez kényelmesebb a Playit, mert stabil címet ad.",
+        "svc_info": " ",
         "pinggy_parancsok": "Parancs előnézete",
-        "pinggy_window": "Minden kiválasztott tunnel saját külön terminálablakban indul, jelszó és interaktív megerősítés nélkül.",
+        "pinggy_window": "Minden kiválasztott tunnel saját külön terminálablakban indul.",
         "backup_menu": "Biztonsági mentések",
         "backup_title": "Automatikus biztonsági mentések",
         "backup_enabled": "Automatikus mentések engedélyezése",
@@ -495,12 +534,15 @@ szovegek = {
         "pinggy_ujraindult": "A Pinggy újraindult.",
         "pinggy_ujra": "Pinggy újraindítása most",
         "pinggy_allapot": "Állapot",
-        "pinggy_hianyzik": "A Pinggy UDP-hez szükség van a pinggy.exe fájlra. Tedd az alkalmazás mellé, vagy add hozzá a PATH-hoz.",
+        "pinggy_hianyzik": "UDP-tunnelhez szükség van a Pinggy CLI-re. Az SSH nem tud UDP-tunnelt létrehozni. Töltsd le a Pinggy CLI-t a pinggy.io/cli oldalról, majd importáld ide.",
+        "pinggy_ssh_hianyzik": "Nincs telepítve az OpenSSH Client/Ügynök. Windows 10/11 alatt nyisd meg a Gépház > Rendszer > Választható funkciók > Kattints a funkciók megtekintése menüpontot > Kattints az Elérhető Funkciók megtekintése opcióra > keresd meg az OpenSSH Clientet/OpenSSH Ügynököt, és telepítsd. Vagy rendszergazdai PowerShellben futtasd:\nAdd-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0\nA telepítés után indítsd újra a CubicLanternt.",
+        "pinggy_cli_hiba": "A Pinggy CLI leállt. Átváltás OpenSSH-ra.",
+        "pinggy_udp_fallback": "A Pinggy CLI leállt, de az SSH nem tud UDP-tunnelt létrehozni. Telepítsd vagy javítsd a Pinggy CLI-t.",
         "pinggy_binaris": "Pinggy bináris",
         "pinggy_letoltes": "Pinggy letöltése a pinggy.io/cli oldalról",
         "pinggy_import": "Bináris importálása",
         "pinggy_torles": "Importált bináris törlése",
-        "pinggy_nincs": "Nincs importált bináris. UDP-hez pinggy szükséges.",
+        "pinggy_nincs": "A Pinggy CLI nem található. UDP-tunnelhez szükség van a Pinggy CLI-re.",
         "pinggy_import_ok": "A Pinggy bináris importálva: {fajl}.",
         "pinggy_torles_ok": "Az importált Pinggy bináris törölve.",
         "pinggy_lejar_10": "A Pinggy 10 perc múlva lejár. Automatikusan újraindul.",
@@ -533,8 +575,55 @@ def tipusfelirat(kulcs):
 
 
 def mappakeszites():
+    regi_adatmappamigracio()
     for mappa in (adatmappa, szerverekmappa, javamappa, playitmappa, pinggymappa):
         mappa.mkdir(parents=True, exist_ok=True)
+
+
+def regi_adatmappamigracio():
+    alap = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
+    regi = Path(alap) / "MinecraftServerMaker"
+    if not regi.is_dir():
+        return
+    if not adatmappa.exists():
+        regi.rename(adatmappa)
+        return
+
+    def osszefesul(forras, cel):
+        for elem in forras.iterdir():
+            cel_elem = cel / elem.name
+            if not cel_elem.exists() and not cel_elem.is_symlink():
+                elem.rename(cel_elem)
+            elif elem.is_dir() and not elem.is_symlink() and cel_elem.is_dir() and not cel_elem.is_symlink():
+                osszefesul(elem, cel_elem)
+                if not any(elem.iterdir()):
+                    elem.rmdir()
+
+    osszefesul(regi, adatmappa)
+    if not any(regi.iterdir()):
+        regi.rmdir()
+
+
+def lan_ipv4_cim():
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as kapcsolat:
+            kapcsolat.connect(("192.0.2.1", 80))
+            cim = kapcsolat.getsockname()[0]
+        if cim and not cim.startswith("127.") and not cim.startswith("169.254.") and cim != "0.0.0.0":
+            return cim
+    except OSError:
+        pass
+    if psutil is not None:
+        try:
+            halozati_cimek = psutil.net_if_addrs()
+        except (OSError, psutil.Error):
+            return None
+        for cimadatok in halozati_cimek.values():
+            for cimadat in cimadatok:
+                cim = cimadat.address
+                if cimadat.family == socket.AF_INET and not cim.startswith(("127.", "169.254.")) and cim != "0.0.0.0":
+                    return cim
+    return None
 
 
 def beallitasbetoltes():
@@ -647,8 +736,8 @@ def jsonlekeres(url):
         return json.loads(valasz.read().decode("utf-8"))
 
 
-def szovegletoltes(url):
-    with keres(url) as valasz:
+def szovegletoltes(url, idokorlat=30):
+    with keres(url, idokorlat) as valasz:
         return valasz.read().decode("utf-8", errors="replace")
 
 
@@ -670,6 +759,23 @@ def fajlletoltes(url, cel, haladas=None):
     resz.replace(cel)
 
 
+def fajlkivonat(ut, algoritmus):
+    kivonat = hashlib.new(algoritmus)
+    with open(ut, "rb") as fajl:
+        for blokk in iter(lambda: fajl.read(65536), b""):
+            kivonat.update(blokk)
+    return kivonat.hexdigest()
+
+
+def eszkozkivonat(eszkoz):
+    digest = str(eszkoz.get("digest") or "")
+    algoritmus, elvalaszto, ertek = digest.partition(":")
+    hosszak = {"md5": 32, "sha256": 64, "sha384": 96, "sha512": 128}
+    if elvalaszto and algoritmus in hosszak and re.fullmatch(r"[0-9a-fA-F]{%d}" % hosszak[algoritmus], ertek):
+        return algoritmus, ertek.lower()
+    return None, None
+
+
 def verzioszamok(szoveg):
     return tuple(int(szam) for szam in re.findall(r"\d+", szoveg))
 
@@ -682,12 +788,33 @@ def rendezes(lista):
     return sorted(set(lista), key=verzioszamok, reverse=True)
 
 
+def verziokulcs(verzio):
+    talalat = re.fullmatch(r"v?(\d+(?:\.\d+)*)(.*)", str(verzio).strip(), re.IGNORECASE)
+    if not talalat:
+        return None
+    szamok = tuple(int(resz) for resz in talalat.group(1).split("."))
+    utotag = talalat.group(2).strip().lower()
+    return szamok, utotag
+
+
+def ujabbappverzio(tavoli, helyi=APP_VERSION):
+    tavoli_kulcs = verziokulcs(tavoli)
+    helyi_kulcs = verziokulcs(helyi)
+    return tavoli_kulcs is not None and helyi_kulcs is not None and tavoli_kulcs > helyi_kulcs
+
+
+def legujabbappverzio():
+    kulcs = platformnev()
+    for sor in szovegletoltes(APP_VERSION_URL, 8).splitlines():
+        nev, elvalaszto, verzio = sor.partition("=")
+        if elvalaszto and nev.strip().lower() == kulcs:
+            verzio = verzio.strip()
+            return verzio if ujabbappverzio(verzio) else None
+    raise ValueError("No version entry for " + kulcs)
+
+
 def platformnev():
-    if os.name == "nt":
-        return "windows"
-    if sys.platform == "darwin":
-        return "mac"
-    return "linux"
+    return "windows"
 
 
 def architektura():
@@ -698,7 +825,6 @@ def architektura():
 
 
 def eszkozvalasztas(eszkozok):
-    oszavak = {"windows": ("windows", "win"), "linux": ("linux",), "mac": ("macos", "darwin", "apple", "osx")}[platformnev()]
     archszavak = ("arm64", "aarch64") if architektura() == "arm64" else ("x86_64", "x64", "amd64")
     tiltott = (".sha256", ".sha1", ".md5", ".zip", ".tar.gz", ".txt", ".sig", ".pdb", ".json", ".deb", ".rpm", ".msi")
     jeloltek = []
@@ -706,9 +832,9 @@ def eszkozvalasztas(eszkozok):
         nev = eszkoz["name"].lower()
         if nev.endswith(tiltott):
             continue
-        if not any(szo in nev for szo in oszavak):
+        if not any(szo in nev for szo in ("windows", "win")):
             continue
-        if platformnev() == "windows" and not nev.endswith(".exe"):
+        if not nev.endswith(".exe"):
             continue
         jeloltek.append(eszkoz)
     for eszkoz in jeloltek:
@@ -795,12 +921,7 @@ def neoforgeverzio(mc):
 
 def bedrockadat():
     adat = jsonlekeres("https://net-secondary.web.minecraft-services.net/api/v1.0/download/links")
-    if os.name == "nt":
-        cel = "serverBedrockWindows"
-    elif sys.platform == "darwin":
-        raise RuntimeError(t("bedrock_nem_tamogatott"))
-    else:
-        cel = "serverBedrockLinux"
+    cel = "serverBedrockWindows"
     for elem in adat["result"]["links"]:
         if elem["downloadType"] == cel:
             url = elem["downloadUrl"]
@@ -845,21 +966,111 @@ def verziolista(tipus):
     return []
 
 
-def paperjar(mc, cel, haladas):
+def paperjaradat(mc):
     try:
         adat = jsonlekeres("https://fill.papermc.io/v3/projects/paper/versions/%s/builds/latest" % mc)
-        url = adat["downloads"]["server:default"]["url"]
+        letoltes = adat["downloads"]["server:default"]
+        return int(adat.get("build") or adat.get("id")), letoltes["url"], letoltes["checksums"]["sha256"]
     except Exception:
         epitesek = jsonlekeres("https://api.papermc.io/v2/projects/paper/versions/%s/builds" % mc)["builds"]
         utolso = epitesek[-1]
         nev = utolso["downloads"]["application"]["name"]
         url = "https://api.papermc.io/v2/projects/paper/versions/%s/builds/%s/downloads/%s" % (mc, utolso["build"], nev)
+        return int(utolso["build"]), url, None
+
+
+def paperjar(mc, cel, haladas):
+    epites, url, sha256 = paperjaradat(mc)
     fajlletoltes(url, cel, haladas)
+    if sha256 and fajlkivonat(cel, "sha256") != sha256:
+        raise RuntimeError("Paper server JAR checksum mismatch.")
+    return epites, sha256
+
+
+def purpurjaradat(mc):
+    adat = jsonlekeres("https://api.purpurmc.org/v2/purpur/%s/latest" % mc)
+    epites = adat["build"]
+    url = "https://api.purpurmc.org/v2/purpur/%s/%s/download" % (mc, epites)
+    return int(epites), url, adat.get("md5")
 
 
 def purpurjar(mc, cel, haladas):
-    epites = jsonlekeres("https://api.purpurmc.org/v2/purpur/%s/latest" % mc)["build"]
-    fajlletoltes("https://api.purpurmc.org/v2/purpur/%s/%s/download" % (mc, epites), cel, haladas)
+    epites, url, md5 = purpurjaradat(mc)
+    fajlletoltes(url, cel, haladas)
+    if md5 and fajlkivonat(cel, "md5") != md5:
+        raise RuntimeError("Purpur server JAR checksum mismatch.")
+    return epites, md5
+
+
+def jarfrissitesadatok(mappa):
+    mappa = Path(mappa)
+    meta = metabetoltes(mappa)
+    tipus = meta.get("tipus")
+    if tipus == "paper":
+        epites, url, sha256 = paperjaradat(meta["verzio"])
+        telepitett = meta.get("jar_build")
+        if telepitett is None and sha256:
+            cel = mappa / (meta.get("fajl") or "server.jar")
+            if cel.is_file() and fajlkivonat(cel, "sha256") == sha256:
+                meta["jar_build"] = epites
+                meta["jar_sha256"] = sha256
+                metamentes(mappa, meta)
+                return None
+        if telepitett is not None and int(telepitett) >= epites:
+            return None
+        return {"tipus": tipus, "verzio": str(epites), "kulcs": "jar_build", "ertek": epites, "url": url, "cel": meta.get("fajl") or "server.jar", "hash_algoritmus": "sha256", "hash": sha256}
+    if tipus == "purpur":
+        epites, url, md5 = purpurjaradat(meta["verzio"])
+        telepitett = meta.get("jar_build")
+        if telepitett is None and md5:
+            cel = mappa / (meta.get("fajl") or "server.jar")
+            if cel.is_file() and fajlkivonat(cel, "md5") == md5:
+                meta["jar_build"] = epites
+                meta["jar_md5"] = md5
+                metamentes(mappa, meta)
+                return None
+        if telepitett is not None and int(telepitett) >= epites:
+            return None
+        return {"tipus": tipus, "verzio": str(epites), "kulcs": "jar_build", "ertek": epites, "url": url, "cel": meta.get("fajl") or "server.jar", "hash_algoritmus": "md5", "hash": md5}
+    if tipus == "pumpkin":
+        kiadas = pumpkinkiadas()
+        verzio = str(kiadas.get("tag_name") or kiadas.get("name") or "")
+        eszkoz = eszkozvalasztas(kiadas.get("assets", []))
+        if not verzio or not eszkoz:
+            raise RuntimeError("PumpkinMC update asset was not found for Windows.")
+        algoritmus, digest = eszkozkivonat(eszkoz)
+        if not meta.get("jar_version") and digest:
+            cel = mappa / (meta.get("fajl") or "pumpkin.exe")
+            if cel.is_file() and fajlkivonat(cel, algoritmus) == digest:
+                meta["jar_version"] = verzio
+                meta["jar_" + algoritmus] = digest
+                metamentes(mappa, meta)
+                return None
+        if meta.get("jar_version") == verzio:
+            return None
+        return {"tipus": tipus, "verzio": verzio, "kulcs": "jar_version", "ertek": verzio, "url": eszkoz["browser_download_url"], "cel": meta.get("fajl") or "pumpkin.exe", "hash_algoritmus": algoritmus, "hash": digest}
+    return None
+
+
+def jarfrissitesletoltes(mappa, frissites):
+    mappa = Path(mappa)
+    cel = mappa / frissites["cel"]
+    ideiglenes = cel.with_name(cel.name + ".update")
+    try:
+        fajlletoltes(frissites["url"], ideiglenes)
+        if frissites.get("hash"):
+            if fajlkivonat(ideiglenes, frissites["hash_algoritmus"]) != frissites["hash"]:
+                raise RuntimeError("Downloaded server file checksum mismatch.")
+        ideiglenes.replace(cel)
+    finally:
+        ideiglenes.unlink(missing_ok=True)
+        ideiglenes.with_name(ideiglenes.name + ".resz").unlink(missing_ok=True)
+    meta = metabetoltes(mappa)
+    meta[frissites["kulcs"]] = frissites["ertek"]
+    if frissites.get("hash"):
+        meta["jar_" + frissites["hash_algoritmus"]] = frissites["hash"]
+    metamentes(mappa, meta)
+    return frissites["verzio"]
 
 
 def fabricjar(mc, cel, haladas):
@@ -870,7 +1081,7 @@ def fabricjar(mc, cel, haladas):
 
 def javautvonal(foverzio):
     mappa = javamappa / str(foverzio)
-    nev = "java.exe" if os.name == "nt" else "java"
+    nev = "java.exe"
     if mappa.exists():
         for ut in mappa.rglob(nev):
             if ut.parent.name == "bin" and ut.is_file():
@@ -891,38 +1102,25 @@ def javaletoltes(foverzio, haladas=None):
         shutil.rmtree(cel, ignore_errors=True)
     cel.mkdir(parents=True)
     try:
-        if zipfile.is_zipfile(ideiglenes):
-            with zipfile.ZipFile(ideiglenes) as archivum:
-                archivum.extractall(cel)
-        else:
-            with tarfile.open(ideiglenes) as archivum:
-                if hasattr(tarfile, "data_filter"):
-                    archivum.extractall(cel, filter="data")
-                else:
-                    archivum.extractall(cel)
+        with zipfile.ZipFile(ideiglenes) as archivum:
+            archivum.extractall(cel)
     finally:
         ideiglenes.unlink(missing_ok=True)
     ut = javautvonal(foverzio)
     if not ut:
         raise RuntimeError("Java")
-    if os.name != "nt":
-        ut.chmod(0o755)
     return ut
 
 
 def playitletoltes(haladas=None):
-    nev = "playit.exe" if os.name == "nt" else "playit"
+    nev = "playit.exe"
     cel = playitmappa / nev
     if cel.exists():
         return cel
     url = None
     try:
         kiadas = jsonlekeres("https://api.github.com/repos/playit-cloud/playit-agent/releases/latest")
-        eszkoznev = {
-            ("windows", "x86_64"): "playit-windows-x86_64-signed.exe",
-            ("linux", "x86_64"): "playit-linux-amd64",
-            ("linux", "arm64"): "playit-linux-aarch64",
-        }.get((platformnev(), architektura()))
+        eszkoznev = "playit-windows-x86_64-signed.exe" if architektura() == "x86_64" else None
         eszkoz = next(
             (elem for elem in kiadas["assets"] if elem["name"] == eszkoznev),
             None,
@@ -932,35 +1130,25 @@ def playitletoltes(haladas=None):
     except Exception:
         url = None
     if not url:
-        if os.name == "nt":
-            url = "https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-windows-x86_64-signed.exe"
-        else:
-            url = "https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-amd64"
+        url = "https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-windows-x86_64-signed.exe"
     fajlletoltes(url, cel, haladas)
-    if os.name != "nt":
-        cel.chmod(0o755)
     return cel
 
 
 def kulonterminal(program, argumentumok, munkamappa, cim):
     munkamappa = str(munkamappa)
-    if os.name == "nt":
-        return subprocess.Popen([str(program)] + [str(x) for x in argumentumok], cwd=munkamappa, creationflags=subprocess.CREATE_NEW_CONSOLE)
-    parancs = [str(program)] + [str(x) for x in argumentumok]
-    terminal = shutil.which("gnome-terminal") or shutil.which("konsole") or shutil.which("xterm") or shutil.which("x-terminal-emulator")
-    if terminal and Path(terminal).name == "gnome-terminal":
-        parancs = [terminal, "--title", cim, "--"] + parancs
-    elif terminal and Path(terminal).name == "konsole":
-        parancs = [terminal, "--workdir", munkamappa, "-e"] + parancs
-    elif terminal:
-        parancs = [terminal, "-T", cim, "-e"] + parancs
-    else:
-        return subprocess.Popen(parancs, cwd=munkamappa)
-    return subprocess.Popen(parancs, cwd=munkamappa)
+    indito = subprocess.STARTUPINFO()
+    indito.lpTitle = cim
+    return subprocess.Popen(
+        [str(program)] + [str(x) for x in argumentumok],
+        cwd=munkamappa,
+        creationflags=subprocess.CREATE_NEW_CONSOLE,
+        startupinfo=indito,
+    )
 
 
 def pinggyprogram():
-    nev = "pinggy.exe" if os.name == "nt" else "pinggy"
+    nev = "pinggy.exe"
     jeloltek = [pinggymappa / nev, Path.cwd() / nev, Path(__file__).resolve().parent / nev]
     if getattr(sys, "frozen", False):
         jeloltek.insert(0, Path(sys.executable).resolve().parent / nev)
@@ -970,17 +1158,26 @@ def pinggyprogram():
     return shutil.which(nev)
 
 
+def sshprogram():
+    nev = "ssh.exe"
+    talalat = shutil.which(nev)
+    if talalat:
+        return talalat
+    talalat = Path(os.environ.get("WINDIR", r"C:\Windows")) / "System32" / "OpenSSH" / nev
+    if talalat.is_file():
+        return str(talalat)
+    return None
+
+
 def pinggyimportal(forras):
     mappakeszites()
-    cel = pinggymappa / ("pinggy.exe" if os.name == "nt" else "pinggy")
+    cel = pinggymappa / "pinggy.exe"
     shutil.copy2(forras, cel)
-    if os.name != "nt":
-        cel.chmod(cel.stat().st_mode | 0o111)
     return cel
 
 
 def pinggyimportalttorles():
-    cel = pinggymappa / ("pinggy.exe" if os.name == "nt" else "pinggy")
+    cel = pinggymappa / "pinggy.exe"
     try:
         cel.unlink()
     except FileNotFoundError:
@@ -988,64 +1185,90 @@ def pinggyimportalttorles():
     return True
 
 
+def pinggysshparancs(tunnel):
+    tipus = tunnel.get("tipus", "tcp")
+    if tipus == "udp":
+        return None
+    port = int(tunnel.get("port") or 25565)
+    cel = "127.0.0.1:%d" % port
+    host = "free.pinggy.io" if tipus == "http" else "tcp@free.pinggy.io"
+    return sshprogram() or "ssh.exe", ["-p", "443", "-R0:" + cel, host]
+
+
 def pinggyparancs(tunnel):
     tipus = tunnel.get("tipus", "tcp")
     port = int(tunnel.get("port") or 25565)
     cel = "127.0.0.1:%d" % port
+    program = pinggyprogram()
+    if program:
+        cel = "localhost:%d" % port
+        celirany = "udp@free.pinggy.io" if tipus == "udp" else ("free.pinggy.io" if tipus == "http" else "tcp@free.pinggy.io")
+        return program, ["-p", "443", "-R0:" + cel, celirany]
     if tipus == "udp":
-        program = pinggyprogram() or ("pinggy.exe" if os.name == "nt" else "pinggy")
+        program = "pinggy.exe"
         return program, ["-p", "443", "-R0:" + cel, "udp@free.pinggy.io"]
-    if tipus == "http":
-        return "ssh", ["-p", "443", "-R0:" + cel, "free.pinggy.io"]
-    return "ssh", ["-p", "443", "-R0:" + cel, "tcp@free.pinggy.io"]
+    return pinggysshparancs(tunnel)
 
 
 def pinggyparancsszoveg(program, argumentumok):
-    if os.name == "nt":
-        return subprocess.list2cmdline([program] + argumentumok)
-    return shlex.join([program] + argumentumok)
+    return subprocess.list2cmdline([program] + argumentumok)
 
 
 def powershellszoveg(szoveg):
     return "'" + str(szoveg).replace("'", "''") + "'"
 
 
-def pinggysegitoprogram(program, argumentumok):
+def pinggysegitoprogram(program, argumentumok, fallback=None, tipus="tcp"):
     if getattr(sys, "frozen", False):
         elo = [sys.executable, "--cubiclantern-pinggy-tunnel"]
     else:
         elo = [sys.executable, str(Path(__file__).resolve()), "--cubiclantern-pinggy-tunnel"]
-    return elo + [str(program)] + [str(x) for x in argumentumok]
+    adatok = {
+        "program": str(program),
+        "argumentumok": [str(x) for x in argumentumok],
+        "fallback": fallback,
+        "tipus": tipus,
+        "pinggy_cli": program == pinggyprogram(),
+        "nyelv": allapot.get("nyelv", "en"),
+    }
+    if fallback:
+        adatok["fallback"] = [str(fallback[0])] + [str(x) for x in fallback[1]]
+    payload = base64.b64encode(json.dumps(adatok).encode("utf-8")).decode("ascii")
+    return elo + [payload]
 
 
 def pinggyterminal(tunnel, mappa, cim):
     mappa = Path(mappa)
-    if os.name == "nt":
-        launcher = mappa / (".cubiclantern_pinggy_%s.ps1" % uuid.uuid4().hex)
-        program, argumentumok = pinggyparancs(tunnel)
-        segito = pinggysegitoprogram(program, argumentumok)
-        lista = ", ".join(powershellszoveg(x) for x in segito[1:])
-        sorok = ["Write-Host 'CubicLantern Pinggy tunnel'", "Write-Host 'No password or interactive confirmation is required.'", "$program = %s" % powershellszoveg(segito[0]), "Write-Host 'The tunnel is running in this window.'", "while ($true) {", "Start-Process -FilePath $program -ArgumentList @(%s) -NoNewWindow -Wait" % lista, "Start-Sleep -Seconds 2", "}"]
-        launcher.write_text("\r\n".join(sorok) + "\r\n", encoding="utf-8")
-        return subprocess.Popen(["cmd.exe", "/d", "/c", "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(launcher)], cwd=str(mappa), creationflags=subprocess.CREATE_NEW_CONSOLE)
-    launcher = mappa / (".cubiclantern_pinggy_%s.sh" % uuid.uuid4().hex)
+    launcher = mappa / (".cubiclantern_pinggy_%s.ps1" % uuid.uuid4().hex)
     program, argumentumok = pinggyparancs(tunnel)
-    segito = pinggysegitoprogram(program, argumentumok)
-    parancs = pinggyparancsszoveg(segito[0], segito[1:])
-    sorok = ["#!/bin/sh", "trap 'kill 0 2>/dev/null; exit 0' INT TERM EXIT", "printf '%s\\n' 'CubicLantern Pinggy tunnels: no password or interactive confirmation is required.'"]
-    sorok += ["while true; do " + parancs + "; sleep 1; done"]
-    launcher.write_text("\n".join(sorok) + "\n", encoding="utf-8")
-    launcher.chmod(0o755)
-    terminal = shutil.which("gnome-terminal") or shutil.which("konsole") or shutil.which("xterm") or shutil.which("x-terminal-emulator")
-    if terminal and Path(terminal).name == "gnome-terminal":
-        parancs = [terminal, "--title", cim, "--", "sh", str(launcher)]
-    elif terminal and Path(terminal).name == "konsole":
-        parancs = [terminal, "--workdir", str(mappa), "-e", "sh", str(launcher)]
-    elif terminal:
-        parancs = [terminal, "-T", cim, "-e", "sh", str(launcher)]
-    else:
-        raise RuntimeError("No graphical terminal emulator was found.")
-    return subprocess.Popen(parancs, cwd=str(mappa), start_new_session=True)
+    cli = pinggyprogram()
+    fallback = pinggysshparancs(tunnel) if cli and tunnel.get("tipus", "tcp") != "udp" else None
+    segito = pinggysegitoprogram(program, argumentumok, fallback, tunnel.get("tipus", "tcp"))
+    lista = ", ".join(powershellszoveg(x) for x in segito[1:])
+    port = int(tunnel.get("port") or 25565)
+    lan = lan_ipv4_cim() or t("pinggy_lan_nincs")
+    sorok = [
+        "Write-Host 'CubicLantern Pinggy tunnel'",
+        "$Host.UI.RawUI.WindowTitle = %s" % powershellszoveg(cim),
+        "Write-Host 'No password or interactive confirmation is required.'",
+    ]
+    sorok += ["Write-Host %s" % powershellszoveg(sor) for sor in t("pinggy_csatlakozas", port=port, lan=lan).splitlines()]
+    if tunnel.get("tipus", "tcp") == "tcp":
+        sorok.append("Write-Host %s" % powershellszoveg(t("pinggy_tcp_tipp")))
+    sorok += [
+        "$program = %s" % powershellszoveg(segito[0]),
+        "Write-Host 'The tunnel is running in this window.'",
+        "while ($true) {",
+        "Start-Process -FilePath $program -ArgumentList @(%s) -NoNewWindow -Wait" % lista,
+        "Start-Sleep -Seconds 2",
+        "}",
+    ]
+    launcher.write_text("\r\n".join(sorok) + "\r\n", encoding="utf-8")
+    return subprocess.Popen(
+        ["cmd.exe", "/d", "/c", "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(launcher)],
+        cwd=str(mappa),
+        creationflags=subprocess.CREATE_NEW_CONSOLE,
+    )
 
 
 def playitapipost(utvonal, adatok):
@@ -1459,10 +1682,7 @@ class szerverfolyamat(QObject):
         self.pinggyidozito.start()
         playitazonosito = hashlib.sha256(str(self.mappa.resolve()).encode("utf-8")).hexdigest()[:16]
         self.playitkulcsfajl = playitmappa / ("agent_" + playitazonosito + ".secret")
-        if os.name == "nt":
-            self.playitsocket = r"\\.\pipe\MinecraftServerMaker-" + playitazonosito
-        else:
-            self.playitsocket = str(playitmappa / ("playitd-" + playitazonosito + ".sock"))
+        self.playitsocket = r"\\.\pipe\MinecraftServerMaker-" + playitazonosito
         self.playitujrahitelesites = False
 
     def tipus(self):
@@ -1488,7 +1708,7 @@ class szerverfolyamat(QObject):
         self.sorkesz.emit(szoveg)
 
     def argsfajl(self):
-        nev = "win_args.txt" if os.name == "nt" else "unix_args.txt"
+        nev = "win_args.txt"
         if self.tipus() == "forge":
             minta = "libraries/net/minecraftforge/forge/*/" + nev
         else:
@@ -1507,7 +1727,7 @@ class szerverfolyamat(QObject):
     def parancsepites(self):
         tipus = self.tipus()
         if tipus == "bedrock":
-            return str(self.mappa / ("bedrock_server.exe" if os.name == "nt" else "bedrock_server")), []
+            return str(self.mappa / "bedrock_server.exe"), []
         if tipus == "pumpkin":
             return str(self.mappa / self.meta["fajl"]), []
         java = javautvonal(int(self.meta["java"]))
@@ -1570,10 +1790,6 @@ class szerverfolyamat(QObject):
         self.folyamat = QProcess(self)
         self.folyamat.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         self.folyamat.setWorkingDirectory(str(self.mappa))
-        if self.tipus() == "bedrock" and os.name != "nt":
-            kornyezet = QProcessEnvironment.systemEnvironment()
-            kornyezet.insert("LD_LIBRARY_PATH", ".")
-            self.folyamat.setProcessEnvironment(kornyezet)
         self.folyamat.readyReadStandardOutput.connect(self.kimenetolvasas)
         self.folyamat.finished.connect(self.folyamatvege)
         self.folyamat.errorOccurred.connect(self.folyamathiba)
@@ -1824,6 +2040,11 @@ class szerverfolyamat(QObject):
             self.pinggyallapot = t("pinggy_hianyzik")
             self.playitvaltozas.emit()
             return
+        if not pinggyprogram() and any(tunnel.get("tipus") != "udp" for tunnel in aktiv) and not sshprogram():
+            self.pinggyaktiv = False
+            self.pinggyallapot = t("pinggy_ssh_hianyzik")
+            self.playitvaltozas.emit()
+            return
         self.pinggyfolyamatleallitas()
         try:
             self.pinggyfolyamatok = []
@@ -1847,13 +2068,7 @@ class szerverfolyamat(QObject):
     def pinggyfolyamatleallitas(self):
         for folyamat in self.pinggyfolyamatok:
             if folyamat.poll() is None:
-                if os.name == "nt":
-                    subprocess.run(["taskkill", "/PID", str(folyamat.pid), "/T", "/F"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
-                else:
-                    try:
-                        os.killpg(folyamat.pid, 15)
-                    except (OSError, ProcessLookupError):
-                        folyamat.terminate()
+                subprocess.run(["taskkill", "/PID", str(folyamat.pid), "/T", "/F"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
         self.pinggyfolyamatok = []
 
     def pinggyleallitas(self, kezi=True, uzenet=True):
@@ -2047,9 +2262,6 @@ class keszitomunka(QThread):
             self.vege.emit(False, str(hiba) or repr(hiba))
 
     def telepitofuttatas(self, java, jar, mappa):
-        kapcsolok = {}
-        if os.name == "nt":
-            kapcsolok["creationflags"] = 0x08000000
         folyamat = subprocess.Popen(
             [str(java), "-jar", jar, "--installServer"],
             cwd=str(mappa),
@@ -2058,7 +2270,7 @@ class keszitomunka(QThread):
             text=True,
             encoding="utf-8",
             errors="replace",
-            **kapcsolok
+            creationflags=subprocess.CREATE_NO_WINDOW,
         )
         utolsok = []
         for sor in folyamat.stdout:
@@ -2107,10 +2319,10 @@ class keszitomunka(QThread):
             fajlletoltes(url, cel, self.haladas.emit)
             meta["fajl"] = "server.jar"
         elif tipus == "paper":
-            paperjar(verzio, cel, self.haladas.emit)
+            meta["jar_build"], meta["jar_sha256"] = paperjar(verzio, cel, self.haladas.emit)
             meta["fajl"] = "server.jar"
         elif tipus == "purpur":
-            purpurjar(verzio, cel, self.haladas.emit)
+            meta["jar_build"], meta["jar_md5"] = purpurjar(verzio, cel, self.haladas.emit)
             meta["fajl"] = "server.jar"
         elif tipus == "fabric":
             fabricjar(verzio, cel, self.haladas.emit)
@@ -2142,20 +2354,21 @@ class keszitomunka(QThread):
             with zipfile.ZipFile(zipcel) as archivum:
                 archivum.extractall(mappa)
             zipcel.unlink(missing_ok=True)
-            futtathato = mappa / ("bedrock_server.exe" if os.name == "nt" else "bedrock_server")
-            if os.name != "nt" and futtathato.exists():
-                futtathato.chmod(0o755)
         elif tipus == "pumpkin":
             kiadas = pumpkinkiadas()
             eszkoz = eszkozvalasztas(kiadas["assets"])
             if not eszkoz:
                 raise RuntimeError("PumpkinMC binary not found for this platform")
-            nev = "pumpkin.exe" if os.name == "nt" else "pumpkin"
+            nev = "pumpkin.exe"
             fajlletoltes(eszkoz["browser_download_url"], mappa / nev, self.haladas.emit)
-            if os.name != "nt":
-                (mappa / nev).chmod(0o755)
             meta["fajl"] = nev
             meta["verzio"] = "latest"
+            meta["jar_version"] = str(kiadas.get("tag_name") or kiadas.get("name") or "latest")
+            algoritmus, digest = eszkozkivonat(eszkoz)
+            if digest:
+                if fajlkivonat(mappa / nev, algoritmus) != digest:
+                    raise RuntimeError("PumpkinMC server file checksum mismatch.")
+                meta["jar_" + algoritmus] = digest
         self.uzenet.emit(t("konfig_iras"))
         if javas:
             (mappa / "eula.txt").write_text("eula=true\n", encoding="utf-8")
@@ -2340,35 +2553,13 @@ class letrehozoablak(QDialog):
         QMessageBox.critical(self, t("hiba"), uzenet)
 
 
-class iranyitooldal(QWidget):
+class konzolablak(QDialog):
     def __init__(self, szerver, szulo=None):
-        super().__init__(szulo)
+        super().__init__(szulo, Qt.WindowType.Window)
         self.szerver = szerver
-        tipus = szerver.tipus()
+        self.setWindowTitle(t("konzol_megnyitasa") + " — " + szerver.meta.get("nev", "Minecraft"))
+        self.resize(900, 580)
         fo = QVBoxLayout(self)
-        fo.setContentsMargins(0, 0, 0, 0)
-        gombok = QHBoxLayout()
-        self.startgomb = QPushButton(t("start"))
-        self.startgomb.setObjectName("zold")
-        self.stopgomb = QPushButton(t("stop"))
-        self.stopgomb.setObjectName("piros")
-        self.ujragomb = QPushButton(t("restart"))
-        self.startgomb.clicked.connect(szerver.inditas)
-        self.stopgomb.clicked.connect(szerver.leallitas)
-        self.ujragomb.clicked.connect(szerver.ujrainditas)
-        gombok.addWidget(self.startgomb)
-        gombok.addWidget(self.stopgomb)
-        gombok.addWidget(self.ujragomb)
-        gombok.addStretch()
-        fo.addLayout(gombok)
-        if tipus == "pumpkin":
-            figyelmeztetes = QLabel(t("pumpkin_fejlesztes") + " " + t("pumpkin_gep") + " " + t("pumpkin_kezi"))
-            figyelmeztetes.setObjectName("figyelmeztetes")
-            figyelmeztetes.setWordWrap(True)
-            fo.addWidget(figyelmeztetes)
-            mappagomb = QPushButton(t("pumpkin_mappa"))
-            mappagomb.clicked.connect(lambda: mappamegnyitas(szerver.mappa))
-            fo.addWidget(mappagomb, 0, Qt.AlignmentFlag.AlignLeft)
         self.konzol = QPlainTextEdit()
         self.konzol.setObjectName("konzol")
         self.konzol.setReadOnly(True)
@@ -2384,6 +2575,62 @@ class iranyitooldal(QWidget):
         beviteli.addWidget(self.beviteli, 1)
         beviteli.addWidget(self.kuldgomb)
         fo.addLayout(beviteli)
+        szerver.sorkesz.connect(self.konzolsor)
+        szerver.allapotvaltozas.connect(self.frissit)
+        self.frissit()
+
+    def konzolsor(self, sor):
+        self.konzol.appendPlainText(sor)
+
+    def kuldes(self):
+        szoveg = self.beviteli.text().strip()
+        if szoveg and self.szerver.fut():
+            self.szerver.parancs(szoveg)
+        self.beviteli.clear()
+
+    def frissit(self):
+        fut = self.szerver.fut()
+        self.beviteli.setEnabled(fut)
+        self.kuldgomb.setEnabled(fut)
+
+    def closeEvent(self, esemeny):
+        esemeny.ignore()
+        self.hide()
+
+
+class iranyitooldal(QWidget):
+    def __init__(self, szerver, szulo=None):
+        super().__init__(szulo)
+        self.szerver = szerver
+        self.konzolablak = konzolablak(szerver, self)
+        tipus = szerver.tipus()
+        fo = QVBoxLayout(self)
+        fo.setContentsMargins(0, 0, 0, 0)
+        gombok = QHBoxLayout()
+        self.startgomb = QPushButton(t("start"))
+        self.startgomb.setObjectName("zold")
+        self.stopgomb = QPushButton(t("stop"))
+        self.stopgomb.setObjectName("piros")
+        self.ujragomb = QPushButton(t("restart"))
+        self.startgomb.clicked.connect(self.inditas)
+        self.stopgomb.clicked.connect(szerver.leallitas)
+        self.ujragomb.clicked.connect(self.ujrainditas)
+        self.konzolgomb = QPushButton(t("konzol_megnyitasa"))
+        self.konzolgomb.clicked.connect(self.konzolmegnyitasa)
+        gombok.addWidget(self.startgomb)
+        gombok.addWidget(self.stopgomb)
+        gombok.addWidget(self.ujragomb)
+        gombok.addWidget(self.konzolgomb)
+        gombok.addStretch()
+        fo.addLayout(gombok)
+        if tipus == "pumpkin":
+            figyelmeztetes = QLabel(t("pumpkin_fejlesztes") + " " + t("pumpkin_gep") + " " + t("pumpkin_kezi"))
+            figyelmeztetes.setObjectName("figyelmeztetes")
+            figyelmeztetes.setWordWrap(True)
+            fo.addWidget(figyelmeztetes)
+            mappagomb = QPushButton(t("pumpkin_mappa"))
+            mappagomb.clicked.connect(lambda: mappamegnyitas(szerver.mappa))
+            fo.addWidget(mappagomb, 0, Qt.AlignmentFlag.AlignLeft)
         memoriadoboz = QGroupBox(t("memoria"))
         memoriaelrendezes = QHBoxLayout(memoriadoboz)
         self.memoriasav = QProgressBar()
@@ -2461,6 +2708,10 @@ class iranyitooldal(QWidget):
         pinggytipp.setWordWrap(True)
         pinggytipp.setObjectName("halvany")
         pinggyelrendezes.addWidget(pinggytipp)
+        self.pinggycimek = QLabel()
+        self.pinggycimek.setWordWrap(True)
+        self.pinggycimek.setObjectName("halvany")
+        pinggyelrendezes.addWidget(self.pinggycimek)
         pinggybinarissor = QHBoxLayout()
         pinggybinarissor.addWidget(QLabel(t("pinggy_binaris")))
         self.pinggybinarisallapot = QLabel()
@@ -2494,6 +2745,7 @@ class iranyitooldal(QWidget):
         pinggyelrendezes.addWidget(self.pinggyertesites)
         self.pinggyallapot = QLabel()
         self.pinggyallapot.setObjectName("halvany")
+        self.pinggyallapot.setWordWrap(True)
         pinggyelrendezes.addWidget(self.pinggyallapot)
         fo.addWidget(pinggydoboz)
         pingdoboz = QGroupBox(t("ping_doboz"))
@@ -2504,7 +2756,6 @@ class iranyitooldal(QWidget):
         pingelrendezes.addWidget(self.pinggomb)
         pingelrendezes.addWidget(self.pingeredmeny, 1)
         fo.addWidget(pingdoboz)
-        szerver.sorkesz.connect(self.konzolsor)
         szerver.allapotvaltozas.connect(self.frissit)
         szerver.playitvaltozas.connect(self.playitfrissites)
         self.idozito = QTimer(self)
@@ -2515,14 +2766,18 @@ class iranyitooldal(QWidget):
         self.pinggymentese()
         self.pinggybinarisfrissitese()
 
-    def konzolsor(self, sor):
-        self.konzol.appendPlainText(sor)
+    def konzolmegnyitasa(self):
+        self.konzolablak.show()
+        self.konzolablak.raise_()
+        self.konzolablak.activateWindow()
 
-    def kuldes(self):
-        szoveg = self.beviteli.text().strip()
-        if szoveg:
-            self.szerver.parancs(szoveg)
-        self.beviteli.clear()
+    def inditas(self):
+        self.konzolmegnyitasa()
+        self.szerver.inditas()
+
+    def ujrainditas(self):
+        self.konzolmegnyitasa()
+        self.szerver.ujrainditas()
 
     def frissit(self):
         fut = self.szerver.fut()
@@ -2530,8 +2785,6 @@ class iranyitooldal(QWidget):
         self.startgomb.setEnabled(not fut and not foglalt)
         self.stopgomb.setEnabled(fut)
         self.ujragomb.setEnabled(fut)
-        self.beviteli.setEnabled(fut)
-        self.kuldgomb.setEnabled(fut)
         self.playitfrissites()
 
     def memoriafrissites(self):
@@ -2566,6 +2819,11 @@ class iranyitooldal(QWidget):
         adat = self.pinggyadatok()
         self.szerver.meta["pinggy"] = adat
         self.szerver.metamentese()
+        lan = lan_ipv4_cim() or t("pinggy_lan_nincs")
+        cimek = t("pinggy_csatlakozas", port=self.szerver.portszam(), lan=lan)
+        if any(tunnel["engedelyezve"] and tunnel["tipus"] == "tcp" for tunnel in adat):
+            cimek += "\n" + t("pinggy_tcp_tipp")
+        self.pinggycimek.setText(cimek)
         parancsok = []
         for tunnel in adat:
             if tunnel["engedelyezve"]:
@@ -2578,6 +2836,17 @@ class iranyitooldal(QWidget):
             self.szerver.pinggyleallitas()
         else:
             self.pinggymentese()
+            tunnelek = [tunnel for tunnel in self.szerver.meta.get("pinggy", []) if tunnel.get("engedelyezve")]
+            if any(tunnel.get("tipus") == "udp" for tunnel in tunnelek) and not pinggyprogram():
+                QMessageBox.warning(self, t("figyelem"), t("pinggy_hianyzik"))
+                self.szerver.pinggyallapot = t("pinggy_hianyzik")
+                self.playitfrissites()
+                return
+            if not pinggyprogram() and any(tunnel.get("tipus") != "udp" for tunnel in tunnelek) and not sshprogram():
+                QMessageBox.warning(self, t("figyelem"), t("pinggy_ssh_hianyzik"))
+                self.szerver.pinggyallapot = t("pinggy_ssh_hianyzik")
+                self.playitfrissites()
+                return
             self.szerver.pinggyinditas(self.szerver.meta.get("pinggy", []))
         self.playitfrissites()
 
@@ -3265,6 +3534,17 @@ class beallitasoldal(QWidget):
         self.szerkeszto = None
         fo = QVBoxLayout(self)
         fo.setContentsMargins(0, 0, 0, 0)
+        self.jarfrissitescimke = None
+        self.jarfrissitesgomb = None
+        if self.tipus in ("paper", "purpur", "pumpkin"):
+            self.jarfrissitescimke = QLabel()
+            self.jarfrissitescimke.setWordWrap(True)
+            self.jarfrissitescimke.setObjectName("halvany")
+            self.jarfrissitesgomb = QPushButton(t("jar_update_search"))
+            self.jarfrissitesgomb.clicked.connect(self.jarfrissiteskeresese)
+            fo.addWidget(self.jarfrissitescimke)
+            fo.addWidget(self.jarfrissitesgomb, 0, Qt.AlignmentFlag.AlignLeft)
+            QTimer.singleShot(0, self.jarfrissiteskeresese)
         if self.tipus == "pumpkin":
             figyelmeztetes = QLabel(t("pumpkin_fejlesztes") + "\n" + t("pumpkin_gep") + "\n" + t("pumpkin_kezi"))
             figyelmeztetes.setObjectName("figyelmeztetes")
@@ -3290,6 +3570,60 @@ class beallitasoldal(QWidget):
         torlesgomb.clicked.connect(self.torles)
         fo.addWidget(torlesgomb, 0, Qt.AlignmentFlag.AlignLeft)
         self.frissit()
+
+    def jarfrissiteskeresese(self):
+        if self.jarfrissitesgomb is None:
+            return
+        self.jarfrissitesgomb.setEnabled(False)
+        self.jarfrissitescimke.setText(t("jar_update_checking"))
+        hatterfeladat(
+            lambda: jarfrissitesadatok(self.szerver.mappa),
+            self.jarfrissiteskesz,
+            self.jarfrissiteshiba,
+        )
+
+    def jarfrissiteskesz(self, frissites):
+        self.jarfrissitesgomb.setEnabled(True)
+        if frissites is None:
+            self.jarfrissitescimke.setText(t("jar_update_none"))
+            return
+        self.jarfrissitescimke.setText(t("jar_update_available", verzio=frissites["verzio"]))
+        valasz = QMessageBox.question(
+            self,
+            t("figyelem"),
+            t("jar_update_available", verzio=frissites["verzio"]),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if valasz == QMessageBox.StandardButton.Yes:
+            self.jarfrissitesletoltes(frissites)
+
+    def jarfrissiteshiba(self, hiba):
+        self.jarfrissitesgomb.setEnabled(True)
+        self.jarfrissitescimke.setText(t("jar_update_offline"))
+        self.jarfrissitescimke.setToolTip(str(hiba))
+
+    def jarfrissitesletoltes(self, frissites):
+        if self.szerver.fut():
+            QMessageBox.warning(self, t("figyelem"), t("jar_update_running"))
+            return
+        self.jarfrissitesgomb.setEnabled(False)
+        self.jarfrissitescimke.setText(t("jar_update_downloading", verzio=frissites["verzio"]))
+        hatterfeladat(
+            lambda: jarfrissitesletoltes(self.szerver.mappa, frissites),
+            self.jarfrissiteskeszlet,
+            self.jarfrissitesletolteshiba,
+        )
+
+    def jarfrissiteskeszlet(self, verzio):
+        self.szerver.meta = metabetoltes(self.szerver.mappa)
+        self.jarfrissitesgomb.setEnabled(True)
+        self.jarfrissitescimke.setText(t("jar_update_done", verzio=verzio))
+
+    def jarfrissitesletolteshiba(self, hiba):
+        self.jarfrissitesgomb.setEnabled(True)
+        self.jarfrissitescimke.setText(t("jar_update_error", hiba=hiba))
+        QMessageBox.warning(self, t("hiba"), t("jar_update_error", hiba=hiba))
 
     def escape(self):
         return self.tipus != "bedrock"
@@ -3487,6 +3821,7 @@ class foablak(QMainWindow):
         self.szerverek = {}
         self.biztoskilepes = False
         self.aktualisoldal = None
+        self.frissitesi_verzio = None
         self.verem = QStackedWidget()
         self.setCentralWidget(self.verem)
         self.fooldal = QWidget()
@@ -3500,8 +3835,12 @@ class foablak(QMainWindow):
         self.letrehozgomb = QPushButton(t("szerver_letrehozasa"))
         self.letrehozgomb.setObjectName("elsodleges")
         self.letrehozgomb.clicked.connect(self.letrehozas)
+        self.frissitesgomb = QPushButton(t("app_update_button"))
+        self.frissitesgomb.clicked.connect(self.appfrissitesinditasa)
+        self.frissitesgomb.setVisible(False)
         self.nyelvgomb = QPushButton("Language")
         self.nyelvgomb.clicked.connect(self.nyelvablak)
+        felso.addWidget(self.frissitesgomb)
         felso.addWidget(self.letrehozgomb)
         felso.addWidget(self.nyelvgomb)
         fo.addLayout(felso)
@@ -3516,6 +3855,44 @@ class foablak(QMainWindow):
         fo.addWidget(self.urescimke, 1)
         self.verem.addWidget(self.fooldal)
         self.listafrissites()
+        QTimer.singleShot(0, self.appfrissiteskeresese)
+
+    def appfrissiteskeresese(self):
+        hatterfeladat(
+            legujabbappverzio,
+            self.appfrissiteskereseskesz,
+            self.appfrissiteskereseshhiba,
+        )
+
+    def appfrissiteskereseshhiba(self, hiba):
+        self.frissitesgomb.setToolTip(str(hiba))
+
+    def appfrissiteskereseskesz(self, verzio):
+        if not verzio:
+            return
+        self.frissitesi_verzio = verzio
+        uzenet = QMessageBox(self)
+        uzenet.setWindowTitle(t("app_update_title"))
+        uzenet.setText(t("app_update_prompt", verzio=verzio))
+        frissitesgomb = uzenet.addButton(t("app_update_now"), QMessageBox.ButtonRole.AcceptRole)
+        uzenet.addButton(t("app_update_later"), QMessageBox.ButtonRole.RejectRole)
+        uzenet.exec()
+        if uzenet.clickedButton() == frissitesgomb:
+            self.appfrissitesinditasa()
+        else:
+            self.frissitesgomb.setVisible(True)
+
+    def appfrissitesinditasa(self):
+        if not QDesktopServices.openUrl(QUrl(APP_WEBSITE_URL)):
+            QMessageBox.information(
+                self,
+                t("app_update_title"),
+                t("app_update_website", url=APP_WEBSITE_URL),
+            )
+            return
+        self.mindenleallitasa()
+        self.biztoskilepes = True
+        self.close()
 
     def sorkeszites(self, szerver):
         kocka = QFrame()
@@ -3684,87 +4061,120 @@ def pinggysegitofolyamat():
         index = sys.argv.index(jel)
     except ValueError:
         return 1
-    parancs = sys.argv[index + 1:]
-    if not parancs:
+    if len(sys.argv) <= index + 1:
         return 1
-    if os.name == "nt":
-        if sys.stdout is None or sys.stderr is None:
-            try:
-                import ctypes
-                ctypes.windll.kernel32.AttachConsole(-1)
-            except (AttributeError, OSError):
-                pass
-            try:
-                if sys.stdout is None:
-                    sys.stdout = open("CONOUT$", "w", encoding="utf-8", errors="replace")
-                if sys.stderr is None:
-                    sys.stderr = open("CONOUT$", "w", encoding="utf-8", errors="replace")
-            except OSError:
-                pass
+    try:
+        payload = base64.b64decode(sys.argv[index + 1]).decode("utf-8")
+        adatok = json.loads(payload)
+        parancs = [adatok["program"]] + adatok["argumentumok"]
+    except (ValueError, KeyError, TypeError, UnicodeDecodeError):
         try:
-            from winpty import PtyProcess
-        except ImportError:
-            folyamat = subprocess.Popen(parancs, stdin=subprocess.PIPE)
-            time.sleep(2)
-            try:
-                folyamat.stdin.write(b"\n")
-                folyamat.stdin.flush()
-                folyamat.stdin.close()
-            except (BrokenPipeError, OSError):
-                pass
-            return folyamat.wait()
-        folyamat = PtyProcess.spawn(subprocess.list2cmdline(parancs))
-        def kimenet():
-            while True:
-                try:
-                    adat = folyamat.read()
-                except (EOFError, OSError):
-                    break
-                if adat:
-                    sys.stdout.write(adat)
-                    sys.stdout.flush()
-                elif not folyamat.isalive():
-                    break
-        szal = threading.Thread(target=kimenet, daemon=True)
-        szal.start()
+            adatok = json.loads(sys.argv[index + 1])
+            parancs = [adatok["program"]] + adatok["argumentumok"]
+        except (json.JSONDecodeError, KeyError, TypeError):
+            adatok = {"program": sys.argv[index + 1], "argumentumok": sys.argv[index + 2:], "tipus": "tcp"}
+            parancs = [adatok["program"]] + adatok["argumentumok"]
+    if sys.stdout is None or sys.stderr is None or sys.stdin is None:
+        try:
+            import ctypes
+            ctypes.windll.kernel32.AttachConsole(-1)
+        except (AttributeError, OSError):
+            pass
+        try:
+            if sys.stdout is None:
+                sys.stdout = open("CONOUT$", "w", encoding="utf-8", errors="replace")
+            if sys.stderr is None:
+                sys.stderr = open("CONOUT$", "w", encoding="utf-8", errors="replace")
+            if sys.stdin is None:
+                sys.stdin = open("CONIN$", "r", encoding="utf-8", errors="replace")
+        except OSError:
+            pass
+    if adatok.get("nyelv") in szovegek:
+        allapot["nyelv"] = adatok["nyelv"]
+    try:
+        kilepesi_kod = pinggyptyparancs(parancs)
+    except OSError as hiba:
+        kilepesi_kod = 1
+        if not adatok.get("pinggy_cli"):
+            raise
+        print("Pinggy CLI could not be started: %s" % hiba)
+    if not adatok.get("pinggy_cli"):
+        return kilepesi_kod
+    if adatok.get("tipus") == "udp":
+        print(t("pinggy_udp_fallback"))
+        pinggyhibavarakozas()
+        return 0
+    if not adatok.get("fallback"):
+        print(t("pinggy_ssh_hianyzik"))
+        pinggyhibavarakozas()
+        return 0
+    ssh = sshprogram()
+    if not ssh:
+        print(t("pinggy_ssh_hianyzik"))
+        pinggyhibavarakozas()
+        return 0
+    adatok["fallback"][0] = ssh
+    print(t("pinggy_cli_hiba"))
+    sys.stdout.flush()
+    try:
+        return pinggyptyparancs(adatok["fallback"])
+    except OSError as hiba:
+        print("OpenSSH could not be started: %s" % hiba)
+        print(t("pinggy_ssh_hianyzik"))
+        pinggyhibavarakozas()
+        return 0
+
+
+def pinggyhibavarakozas():
+    print("Press Enter to retry after installing or repairing the required client.")
+    sys.stdout.flush()
+    try:
+        sys.stdin.readline()
+    except (AttributeError, OSError):
+        time.sleep(30)
+
+
+def pinggyptyparancs(parancs):
+    try:
+        from winpty import PtyProcess, WinptyError
+    except ImportError:
+        folyamat = subprocess.Popen(parancs, stdin=subprocess.PIPE)
         time.sleep(2)
         try:
-            folyamat.write("\r\n")
-        except (EOFError, OSError):
+            folyamat.stdin.write(b"\n")
+            folyamat.stdin.flush()
+            folyamat.stdin.close()
+        except (BrokenPipeError, OSError):
             pass
-        while folyamat.isalive():
-            time.sleep(0.2)
-        szal.join(timeout=1)
-        return 0
-    import pty
-    import select
-    pid, leiro = pty.fork()
-    if pid == 0:
-        os.execvp(parancs[0], parancs)
-    kezd = time.monotonic()
-    while True:
-        if time.monotonic() - kezd >= 2:
+        return folyamat.wait()
+    try:
+        folyamat = PtyProcess.spawn(subprocess.list2cmdline(parancs))
+    except WinptyError as hiba:
+        raise OSError(str(hiba)) from hiba
+
+    def kimenet():
+        while True:
             try:
-                os.write(leiro, b"\r\n")
-            except OSError:
-                pass
-            break
-        elerheto, _, _ = select.select([leiro], [], [], 0.1)
-        if elerheto:
-            try:
-                os.read(leiro, 4096)
-            except OSError:
+                adat = folyamat.read()
+            except (EOFError, OSError):
                 break
-    while True:
-        elerheto, _, _ = select.select([leiro], [], [], 0.1)
-        if elerheto:
-            try:
-                os.read(leiro, 4096)
-            except OSError:
+            if adat:
+                sys.stdout.write(adat)
+                sys.stdout.flush()
+            elif not folyamat.isalive():
                 break
-        kilepesi, status = os.waitpid(pid, os.WNOHANG)
-        if kilepesi == pid:
-            return os.waitstatus_to_exitcode(status)
+
+    szal = threading.Thread(target=kimenet, daemon=True)
+    szal.start()
+    time.sleep(2)
+    try:
+        folyamat.write("\r\n")
+    except (EOFError, OSError):
+        pass
+    while folyamat.isalive():
+        time.sleep(0.2)
+    szal.join(timeout=1)
+    return folyamat.wait()
 
 
 def inditas():

@@ -20,6 +20,8 @@ A `./linux_build.sh` terminálból, akár a VS Code integrált termináljából 
 
 A normál build a `../dist/CubicLantern_linux/CubicLantern`, a debug build a `../dist/CubicLantern_linux/CubicLantern-Debug` mappába kerül. Ezek külön mappák, ezért nem írják felül a `../dist/CubicLantern` Windowsos kimenetét.
 
+A Linuxos alkalmazás induláskor keresi az új CubicLantern-kiadásokat, a szerver megnyitásakor pedig Paper-, Purpur- és PumpkinMC-frissítéseket keres.
+
 A builder Linux Minten készült és azon lett tesztelve. Ha a mellékelt Linux-kiadás más disztribúción nem működik, készíts helyi binárist ezzel a scripttel. Ha hiányzik a Python, a pip vagy a virtuális környezet támogatása, a script megkeresi a támogatott disztribúciós csomagkezelőt, elmagyarázza, miért kell rendszergazdai jogosultság, majd csak a hiányzó rendszercsomagok telepítéséhez kér `sudo` jelszót. Más disztribúción a hiányzó csomagokat a saját csomagkezelővel telepítsd, majd futtasd újra a scriptet.
 
 ## Kézi build
@@ -28,4 +30,4 @@ Az ennek megfelelő PyInstaller-parancsokat a [make_executable_from_py.txt](make
 
 ## Adatok helye
 
-`~/.local/share/MinecraftServerMaker`, kivéve ha az `XDG_DATA_HOME` más értékre van állítva.
+`~/.local/share/CubicLantern`, kivéve ha az `XDG_DATA_HOME` más értékre van állítva. A korábbi `MinecraftServerMaker` mappát a program automatikusan áthelyezi.
