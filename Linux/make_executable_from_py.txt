@@ -1,4 +1,4 @@
-CubicLantern Linux - build an executable from main_linux.py with PyInstaller
+CubicLantern Linux - build an executable from the split Python files with PyInstaller
 
 Open a terminal in the Linux folder.
 
@@ -14,7 +14,7 @@ python -m pip install -r requirements.txt
 
 Build the windowed executable:
 
-python -m PyInstaller --noconfirm --clean --onedir --windowed --icon=../icon-CL-icon-pack/icon-CL.ico --name CubicLantern --distpath ../dist/CubicLantern_linux --workpath build --specpath build main_linux.py
+python -m PyInstaller --noconfirm --clean --onedir --windowed --hidden-import=PySide6.QtCore --hidden-import=PySide6.QtGui --hidden-import=PySide6.QtWidgets --hidden-import=psutil --hidden-import=uuid --hidden-import=tarfile --hidden-import=shlex --hidden-import=signal --hidden-import=threading --hidden-import=secrets --hidden-import=urllib.request --hidden-import=urllib.error --hidden-import=urllib.parse --add-data "reszek:reszek" --add-data "../icon-CL-icon-pack/icon-CL.ico:." --icon=../icon-CL-icon-pack/icon-CL.ico --name CubicLantern --distpath ../dist/CubicLantern_linux --workpath build --specpath build main_linux.py
 
 The executable will be created here:
 
@@ -22,7 +22,7 @@ The executable will be created here:
 
 For a console version useful for debugging, use this instead:
 
-python -m PyInstaller --noconfirm --clean --onedir --console --icon=../icon-CL-icon-pack/icon-CL.ico --name CubicLantern-Debug --distpath ../dist/CubicLantern_linux --workpath build --specpath build main_linux.py
+python -m PyInstaller --noconfirm --clean --onedir --console --hidden-import=PySide6.QtCore --hidden-import=PySide6.QtGui --hidden-import=PySide6.QtWidgets --hidden-import=psutil --hidden-import=uuid --hidden-import=tarfile --hidden-import=shlex --hidden-import=signal --hidden-import=threading --hidden-import=secrets --hidden-import=urllib.request --hidden-import=urllib.error --hidden-import=urllib.parse --add-data "reszek:reszek" --add-data "../icon-CL-icon-pack/icon-CL.ico:." --icon=../icon-CL-icon-pack/icon-CL.ico --name CubicLantern-Debug --distpath ../dist/CubicLantern_linux --workpath build --specpath build main_linux.py
 
 The debug executable will be created here:
 

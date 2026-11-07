@@ -2,8 +2,8 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 ; Non-commercial use only
 
-#define MyAppName "CubicLantern"
-#define MyAppVersion "v1.1.0"
+#define MyAppName "https://zoardgodor.github.io/CubicLantern/"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "Zoárd Gódor"
 #define MyAppURL "https://zoardgodor.github.io/CubicLantern/"
 #define MyAppExeName "CubicLantern.exe"
@@ -11,7 +11,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{F8E66231-B793-4C02-AA6B-733491F7E346}
+AppId={{7D8B904E-489B-4649-ADAB-FEC08B83B435}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -35,7 +35,7 @@ LicenseFile=C:\Users\zoard\Documents\GitHub\zmcservermanager\LICENSE.txt
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=C:\Users\zoard\Documents\GitHub\zmcservermanager
-OutputBaseFilename=CubicLantern_v1.1.0_WIN64_installer
+OutputBaseFilename=CubicLantern_v1.2.0_WIN64_installer
 SetupIconFile=C:\Users\zoard\Documents\GitHub\zmcservermanager\icon-CL.ico
 SolidCompression=yes
 WizardStyle=modern dynamic

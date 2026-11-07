@@ -44,13 +44,13 @@ echo Invalid build type. No executable was built.
 goto error
 
 :normal_build
-.venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --onedir --windowed --collect-all winpty --icon=icon-CL-icon-pack\icon-CL.ico --name CubicLantern main.py
+.venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --onedir --windowed --hidden-import=PySide6.QtCore --hidden-import=PySide6.QtGui --hidden-import=PySide6.QtWidgets --hidden-import=psutil --hidden-import=winpty --hidden-import=uuid --hidden-import=tarfile --hidden-import=shlex --hidden-import=signal --hidden-import=threading --hidden-import=secrets --hidden-import=urllib.request --hidden-import=urllib.error --hidden-import=urllib.parse --add-data "reszek;reszek" --add-data "icon-CL-icon-pack\icon-CL.ico;." --icon=icon-CL-icon-pack\icon-CL.ico --name CubicLantern main.py
 if errorlevel 1 goto error
 echo Build complete: dist\CubicLantern
 goto end
 
 :debug_build
-.venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --onedir --console --collect-all winpty --icon=icon-CL-icon-pack\icon-CL.ico --name CubicLantern-Debug main.py
+.venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --onedir --console --hidden-import=PySide6.QtCore --hidden-import=PySide6.QtGui --hidden-import=PySide6.QtWidgets --hidden-import=psutil --hidden-import=winpty --hidden-import=uuid --hidden-import=tarfile --hidden-import=shlex --hidden-import=signal --hidden-import=threading --hidden-import=secrets --hidden-import=urllib.request --hidden-import=urllib.error --hidden-import=urllib.parse --add-data "reszek;reszek" --add-data "icon-CL-icon-pack\icon-CL.ico;." --icon=icon-CL-icon-pack\icon-CL.ico --name CubicLantern-Debug main.py
 if errorlevel 1 goto error
 echo Build complete: dist\CubicLantern-Debug
 goto end

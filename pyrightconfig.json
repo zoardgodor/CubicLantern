@@ -1,0 +1,29 @@
+{
+  "include": [
+    "main.py",
+    "reszek",
+    "Linux/main_linux.py",
+    "Linux/reszek"
+  ],
+  "reportUndefinedVariable": "none",
+  "reportUnusedImport": "none",
+  "reportOptionalMemberAccess": "none",
+  "reportOperatorIssue": "none",
+  "reportAttributeAccessIssue": "none",
+  "reportCallIssue": "none",
+  "reportArgumentType": "none",
+  "executionEnvironments": [
+    {
+      "root": "reszek",
+      "diagnosticRuleSet": {
+        "reportUndefinedVariable": "none"
+      }
+    },
+    {
+      "root": "Linux/reszek",
+      "diagnosticRuleSet": {
+        "reportUndefinedVariable": "none"
+      }
+    }
+  ]
+}

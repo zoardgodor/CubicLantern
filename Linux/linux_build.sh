@@ -85,6 +85,6 @@ case "$BUILD_TYPE" in
         ;;
 esac
 
-"$VENV_PYTHON" -m PyInstaller --noconfirm --clean --onedir "$BUILD_MODE" --icon="$ICON_PATH" --name "$BUILD_NAME" --distpath "$DIST_ROOT" --workpath "$BUILD_ROOT" --specpath "$BUILD_ROOT" main_linux.py || exit 1
+"$VENV_PYTHON" -m PyInstaller --noconfirm --clean --onedir "$BUILD_MODE" --hidden-import=PySide6.QtCore --hidden-import=PySide6.QtGui --hidden-import=PySide6.QtWidgets --hidden-import=psutil --hidden-import=uuid --hidden-import=tarfile --hidden-import=shlex --hidden-import=signal --hidden-import=threading --hidden-import=secrets --hidden-import=urllib.request --hidden-import=urllib.error --hidden-import=urllib.parse --add-data "reszek:reszek" --add-data "../icon-CL-icon-pack/icon-CL.ico:." --icon="$ICON_PATH" --name "$BUILD_NAME" --distpath "$DIST_ROOT" --workpath "$BUILD_ROOT" --specpath "$BUILD_ROOT" main_linux.py || exit 1
 
 echo "Build complete: $DIST_ROOT/$BUILD_NAME"
